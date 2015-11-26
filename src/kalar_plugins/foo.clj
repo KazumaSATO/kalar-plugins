@@ -1,4 +1,4 @@
-(ns kalar-plugins.core)
+(ns kalar-plugins.foo)
 
 (defn foo
   "I don't do a whole lot."
