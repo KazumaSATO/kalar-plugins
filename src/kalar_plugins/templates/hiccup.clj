@@ -3,15 +3,22 @@
             [kalar-core.config :as config]))
 
 (defprotocol HiccupPlugin
-  (hiccup-compile [this] [this x]))
+  (hiccup-compile [this]))
 
 (plugin/defkalar-plugin
   hiccup
   plugin/KalarPlugin
-  (load-plugin [this] (println (config/read-config))))
+  (load-plugin
+    [this]
+    (let [hpnamespace (:template-hiccup-ns (config/read-config))]
+      (require hpnamespace)
+      (dorun
+        (for [f (filter #(satisfies? HiccupPlugin (-> % var-get))
+                        (-> hpnamespace ns-publics vals))]
+          (hiccup-compile (var-get f)) )))))
 
 
-(defmacro hiccup [args & body]
-  `(defn hiccup# []
-      (reify HiccupPlugin (hiccup-compile ~(into ['this] args) ~@body)
-        )))
+
+(defmacro def-template [& body]
+  `(def hiccup#
+      (reify HiccupPlugin (hiccup-compile [this] ~@body))))
