@@ -1,6 +1,8 @@
 (ns kalar-plugins.templates.hiccup
   (:require [kalar-core.plugin :as plugin]
-            [kalar-core.config :as config]))
+            [kalar-core.config :as config]
+            [kalar-core.file :as kfile]
+            [clojure.java.io :as io]))
 
 (defprotocol HiccupPlugin
   (hiccup-compile [this]))
@@ -15,10 +17,14 @@
       (dorun
         (for [f (filter #(satisfies? HiccupPlugin (-> % var-get))
                         (-> hpnamespace ns-publics vals))]
-          (hiccup-compile (var-get f)) )))))
+          (println (hiccup-compile (var-get f))))))))
 
 
 
-(defmacro def-template [& body]
+(defmacro def-template [path & body]
   `(def hiccup#
-      (reify HiccupPlugin (hiccup-compile [this] ~@body))))
+     (reify HiccupPlugin
+       (hiccup-compile [this]
+         (let [f# (io/file (kfile/find-dest) ~path)]
+           (kfile/prepare-write-file f#)
+           (spit  f#  (let [] ~@body)))))))
