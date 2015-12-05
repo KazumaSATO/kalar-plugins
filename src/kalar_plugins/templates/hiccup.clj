@@ -17,7 +17,7 @@
       (dorun
         (for [f (filter #(satisfies? HiccupPlugin (-> % var-get))
                         (-> hpnamespace ns-publics vals))]
-          (println (hiccup-compile (var-get f))))))))
+          (hiccup-compile (var-get f)))))))
 
 
 
@@ -28,3 +28,24 @@
          (let [f# (io/file (kfile/find-dest) ~path)]
            (kfile/prepare-write-file f#)
            (spit  f#  (let [] ~@body)))))))
+
+
+
+(comment
+  (def-templates "head" "url-pattern" "dir" "body"))
+
+
+(defmacro def-templates [head url-pattern dir body]
+  `(def hiccup#
+     (reify HiccupPlugin
+       (hiccup-compile [this]
+         (println (.getAbsolutePath (io/file ~dir)))
+         (let [files# (.listFiles (io/file ~dir))
+               rng# (range (count files#))]
+           (dorun  (for [i# rng#]
+             (let [~'mp {:foo "bar" :index i#}]
+               (println ~body) )))
+           )
+           )
+         )))
+
