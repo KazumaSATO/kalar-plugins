@@ -69,27 +69,36 @@
   `(def hiccup#
      (reify HiccupPlugin
        (hiccup-compile [this]
-         (let [parts# (partition-all ~num-perpage (.listFiles (io/file ~dir)))
+         (let [
+               splited-url-ptn# (string/split ~tail-url-ptn  #":num")
+               get-url# (fn [num#] (if (= num# 1) ~head-url
+                                                  (str (first splited-url-ptn#) num# (nth splited-url-ptn# 1))))
+               create-neighbor-page-url# (fn [num# total#]
+                                          (cond
+                                            (= num# 1) {:previous-page nil :next-page (if (> total# 1) (get-url# 2))}
+                                            true {:previous-page (if (= num# 1) ~head-url (get-url# (- num# 1)))
+                                                  :next-page (if (= total# num#) nil (get-url# (+ num# 1)))}))
+               parts# (partition-all ~num-perpage (.listFiles (io/file ~dir)))
                index-abst-map# (zipmap (range 1 (+ 1 (count parts#))) parts#)
                first-abst# (first index-abst-map#)
-               rest-absts# (rest index-abst-map#)]
+               rest-absts# (rest index-abst-map#)
+               total# (count index-abst-map#)]
            (let [~'page_
-                 (merge
-                   {:posts (map #(load-md-excerpt (.getAbsolutePath %)) (val first-abst#))}
-                   {:index (key first-abst#)})
+                 (merge {:posts (map #(load-md-excerpt (.getAbsolutePath %)) (val first-abst#))}
+                        (create-neighbor-page-url# 1 total#))
                  output# (io/file (kfile/find-dest) ~head-url)]
              (kfile/touch output#)
              (spit output# ~body))
            (dorun
              (for [posts-per-page# rest-absts#]
                (let [~'page_ (merge {:posts (map #(load-md-excerpt (.getAbsolutePath %)) (val posts-per-page#))}
-                                 {:index (key first-abst#)})
+                                    (create-neighbor-page-url# (key posts-per-page#) total#))
                      output# (io/file (kfile/find-dest)
-                                      (string/replace ~tail-url-ptn #":id" (str (key posts-per-page#))))]
+                                      (string/replace ~tail-url-ptn #":num" (str (key posts-per-page#))))]
+                 (println ~'page_)
                  (kfile/touch output#)
                  (spit output# ~body))
-               ))
-           )))))
+               )))))))
 
 (defmacro def-page [dir body]
   `(def hiccup#
