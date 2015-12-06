@@ -65,7 +65,7 @@
                  (kfile/touch output#)
                  (spit output# ~body)))))))))
 
-(defmacro def-navpage [head-url tail-url-ptn dir num-perpage body]
+(defmacro def-excerpts [head-url tail-url-ptn dir num-perpage body]
   `(def hiccup#
      (reify HiccupPlugin
        (hiccup-compile [this]
@@ -73,16 +73,17 @@
                index-abst-map# (zipmap (range 1 (+ 1 (count parts#))) parts#)
                first-abst# (first index-abst-map#)
                rest-absts# (rest index-abst-map#)]
-           (let [~'mp
+           (let [~'page_
                  (merge
                    {:posts (map #(load-md-abst (.getAbsolutePath %)) (val first-abst#))}
                    {:index (key first-abst#)})
                  output# (io/file (kfile/find-dest) ~head-url)]
+             (println ~'page_)
              (kfile/touch output#)
              (spit output# ~body))
            (dorun
              (for [posts-per-page# rest-absts#]
-               (let [~'mp (merge {:posts (map #(load-md-abst (.getAbsolutePath %)) (val posts-per-page#))}
+               (let [~'page_ (merge {:posts (map #(load-md-abst (.getAbsolutePath %)) (val posts-per-page#))}
                                  {:index (key first-abst#)})
                      output# (io/file (kfile/find-dest)
                                       (string/replace ~tail-url-ptn #":id" (str (key posts-per-page#))))]
