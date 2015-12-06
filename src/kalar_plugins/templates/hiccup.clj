@@ -44,10 +44,6 @@
         html     (.toString output)]
     {:header metadata :body html}))
 
-(defn hoge [f]
-  (ehtml/select (ehtml/html-resource (StringReader. f)) [:p])
-  )
-
 (defn load-md-abst [^String md]
   (let [compiled (load-markdown md)
         top  (-> (ehtml/select (ehtml/html-resource (StringReader. (:body compiled))) [:p]) first ehtml/text)]
@@ -94,3 +90,19 @@
                  (spit output# ~body))
                ))
            )))))
+
+(defmacro def-page [dir body]
+  `(def hiccup#
+     (reify HiccupPlugin
+       (hiccup-compile [this]
+         (let [mds# (.listFiles (io/file ~dir))]
+           (dorun
+             (for [md# mds#]
+               (let [compiled# (load-markdown (.getAbsolutePath  md#))
+                     metadata# (:header compiled#)
+                     body# (:body compiled#)
+                     output# (io/file (kfile/find-dest) (-> metadata# :url first))
+                     ~'mp metadata#]
+                 (kfile/touch output#)
+                 (spit output# ~body)
+                 ))))))))
