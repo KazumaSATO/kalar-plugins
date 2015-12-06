@@ -65,6 +65,10 @@
                  (kfile/touch output#)
                  (spit output# ~body)))))))))
 
+(defn get-post-url [num]
+  (let [ptn (:post-url-pattern (config/read-config))]
+    (string/replace ptn #":num" (str num))))
+
 (defmacro def-excerpts [head-url tail-url-ptn num-perpage body]
   `(def hiccup#
      (reify HiccupPlugin
@@ -78,24 +82,35 @@
                                             (= num# 1) {:previous-page nil :next-page (if (> total# 1) (get-url# 2))}
                                             true {:previous-page (if (= num# 1) ~head-url (get-url# (- num# 1)))
                                                   :next-page (if (= total# num#) nil (get-url# (+ num# 1)))}))
-               parts# (partition-all ~num-perpage (.listFiles (io/file (-> (config/read-config) :posts-dir))))
-               index-abst-map# (zipmap (range 1 (+ 1 (count parts#))) parts#)
+               parts# (partition-all ~num-perpage
+                                     (let [files# (.listFiles (io/file (-> (config/read-config) :posts-dir)))]
+                                       (map (fn [num# md#] {:post-num num# :md md#})
+                                                     (range 1 (+ 1 (count files#)))
+                                                     files#)
+                                       ))
+               index-abst-map# (map (fn [part-num# mds#] {:part-num part-num# :mds mds#})
+                                    (range 1 (+ 1 (count parts#)))
+                                    parts#)
                first-abst# (first index-abst-map#)
                rest-absts# (rest index-abst-map#)
                total# (count index-abst-map#)]
            (let [~'page_
-                 (merge {:posts (map #(load-md-excerpt (.getAbsolutePath %)) (val first-abst#))}
+                 (merge {:posts (map #(merge
+                                       (load-md-excerpt (.getAbsolutePath (:md %)))
+                                       {:post-url (get-post-url (:post-num %))})
+                                     (:mds first-abst#))}
                         (create-neighbor-page-url# 1 total#))
                  output# (io/file (kfile/find-dest) ~head-url)]
              (kfile/touch output#)
              (spit output# ~body))
            (dorun
              (for [posts-per-page# rest-absts#]
-               (let [~'page_ (merge {:posts (map #(load-md-excerpt (.getAbsolutePath %)) (val posts-per-page#))}
-                                    (create-neighbor-page-url# (key posts-per-page#) total#))
+               (let [~'page_ (merge {:posts (map #(merge (load-md-excerpt (.getAbsolutePath (:md %) ))
+                                                         {:post-url (get-post-url (:post-num %))})
+                                                 (:mds posts-per-page#))}
+                                    (create-neighbor-page-url# (:part-num posts-per-page#) total#))
                      output# (io/file (kfile/find-dest)
-                                      (string/replace ~tail-url-ptn #":num" (str (key posts-per-page#))))]
-                 (println ~'page_)
+                                      (string/replace ~tail-url-ptn #":num" (str (:part-num posts-per-page#))))]
                  (kfile/touch output#)
                  (spit output# ~body))
                )))))))
