@@ -42,15 +42,15 @@
         output   (new StringWriter)
         metadata (md/md-to-html input output :parse-meta? true :heading-anchors true)
         html     (.toString output)]
-    {:header metadata :body html}))
+    (merge metadata {:body html})))
 
-(defn load-md-abst [^String md]
+(defn load-md-excerpt [^String md]
   (let [compiled (load-markdown md)
-        top  (-> (ehtml/select (ehtml/html-resource (StringReader. (:body compiled))) [:p]) first ehtml/text)]
-    {:header (:header compiled) :abstract top}))
+        excerpt  (-> (ehtml/select (ehtml/html-resource (StringReader. (:body compiled))) [:p]) first ehtml/text)]
+    (dissoc (merge compiled {:excerpt excerpt}) :body)))
 
 
-
+; id -> num
 (defmacro def-templates [url-pattern dir body]
   `(def hiccup#
      (reify HiccupPlugin
@@ -75,15 +75,14 @@
                rest-absts# (rest index-abst-map#)]
            (let [~'page_
                  (merge
-                   {:posts (map #(load-md-abst (.getAbsolutePath %)) (val first-abst#))}
+                   {:posts (map #(load-md-excerpt (.getAbsolutePath %)) (val first-abst#))}
                    {:index (key first-abst#)})
                  output# (io/file (kfile/find-dest) ~head-url)]
-             (println ~'page_)
              (kfile/touch output#)
              (spit output# ~body))
            (dorun
              (for [posts-per-page# rest-absts#]
-               (let [~'page_ (merge {:posts (map #(load-md-abst (.getAbsolutePath %)) (val posts-per-page#))}
+               (let [~'page_ (merge {:posts (map #(load-md-excerpt (.getAbsolutePath %)) (val posts-per-page#))}
                                  {:index (key first-abst#)})
                      output# (io/file (kfile/find-dest)
                                       (string/replace ~tail-url-ptn #":id" (str (key posts-per-page#))))]
@@ -100,10 +99,7 @@
            (dorun
              (for [md# mds#]
                (let [compiled# (load-markdown (.getAbsolutePath  md#))
-                     metadata# (:header compiled#)
-                     body# (:body compiled#)
-                     output# (io/file (kfile/find-dest) (-> metadata# :url first))
-                     ~'mp metadata#]
+                     output# (io/file (kfile/find-dest) (-> compiled# :url first))
+                     ~'page_ compiled#]
                  (kfile/touch output#)
-                 (spit output# ~body)
-                 ))))))))
+                 (spit output# ~body)))))))))
