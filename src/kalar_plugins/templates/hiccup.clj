@@ -49,32 +49,33 @@
         excerpt  (-> (ehtml/select (ehtml/html-resource (StringReader. (:body compiled))) [:p]) first ehtml/text)]
     (dissoc (merge compiled {:excerpt excerpt}) :body)))
 
+(def num-ptn #":num")
 
-; id -> num
-(defmacro def-templates [url-pattern dir body]
+(defmacro def-posts [body]
   `(def hiccup#
      (reify HiccupPlugin
        (hiccup-compile [this]
-         (let [files# (.listFiles (io/file ~dir))
+         (let [files# (.listFiles (io/file ~(:posts-dir (config/read-config))))
                rng# (range (count files#))
                index-file-map# (zipmap rng# files#)]
            (dorun
              (for [tuple# index-file-map#]
-               (let [~'mp (merge (load-markdown (.getAbsolutePath (val tuple#))) {:index (key tuple#)})
-                     output# (io/file (kfile/find-dest) (string/replace ~url-pattern #":id" (str (key tuple#))))]
+               (let [~'page_ (merge (load-markdown (.getAbsolutePath (val tuple#))) {:index (key tuple#)})
+                     output# (io/file (kfile/find-dest) (string/replace (:post-url-pattern (config/read-config))
+                                                                        num-ptn (str (key tuple#))))]
                  (kfile/touch output#)
                  (spit output# ~body)))))))))
 
 (defn get-post-url [num]
   (let [ptn (:post-url-pattern (config/read-config))]
-    (string/replace ptn #":num" (str num))))
+    (string/replace ptn num-ptn (str num))))
 
 (defmacro def-excerpts [head-url tail-url-ptn num-perpage body]
   `(def hiccup#
      (reify HiccupPlugin
        (hiccup-compile [this]
          (let [
-               splited-url-ptn# (string/split ~tail-url-ptn  #":num")
+               splited-url-ptn# (string/split ~tail-url-ptn  num-ptn)
                get-url# (fn [num#] (if (= num# 1) ~head-url
                                                   (str (first splited-url-ptn#) num# (nth splited-url-ptn# 1))))
                create-neighbor-page-url# (fn [num# total#]
@@ -110,7 +111,7 @@
                                                  (:mds posts-per-page#))}
                                     (create-neighbor-page-url# (:part-num posts-per-page#) total#))
                      output# (io/file (kfile/find-dest)
-                                      (string/replace ~tail-url-ptn #":num" (str (:part-num posts-per-page#))))]
+                                      (string/replace ~tail-url-ptn num-ptn (str (:part-num posts-per-page#))))]
                  (kfile/touch output#)
                  (spit output# ~body))
                )))))))
