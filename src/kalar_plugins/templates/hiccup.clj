@@ -65,7 +65,7 @@
                  (kfile/touch output#)
                  (spit output# ~body)))))))))
 
-(defmacro def-excerpts [head-url tail-url-ptn dir num-perpage body]
+(defmacro def-excerpts [head-url tail-url-ptn num-perpage body]
   `(def hiccup#
      (reify HiccupPlugin
        (hiccup-compile [this]
@@ -78,7 +78,7 @@
                                             (= num# 1) {:previous-page nil :next-page (if (> total# 1) (get-url# 2))}
                                             true {:previous-page (if (= num# 1) ~head-url (get-url# (- num# 1)))
                                                   :next-page (if (= total# num#) nil (get-url# (+ num# 1)))}))
-               parts# (partition-all ~num-perpage (.listFiles (io/file ~dir)))
+               parts# (partition-all ~num-perpage (.listFiles (io/file (-> (config/read-config) :posts-dir))))
                index-abst-map# (zipmap (range 1 (+ 1 (count parts#))) parts#)
                first-abst# (first index-abst-map#)
                rest-absts# (rest index-abst-map#)
