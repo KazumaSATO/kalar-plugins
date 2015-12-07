@@ -34,9 +34,6 @@
            (kfile/touch f#)
            (spit  f#  (let [] ~@body)))))))
 
-
-
-
 (defn load-markdown [^String file]
   (let [input    (new StringReader (slurp file))
         output   (new StringWriter)
@@ -51,24 +48,36 @@
 
 (def num-ptn #":num")
 
+(defn get-post-url [num]
+  (let [ptn (:post-url-pattern (config/read-config))]
+    (string/replace ptn num-ptn (str num))))
+
 (defmacro def-posts [body]
   `(def hiccup#
      (reify HiccupPlugin
        (hiccup-compile [this]
          (let [files# (.listFiles (io/file ~(:posts-dir (config/read-config))))
-               rng# (range (count files#))
-               index-file-map# (zipmap rng# files#)]
+               total# (count files#)
+               get-next-post# (fn [num#] (if (= num# total#) nil (get-post-url (+ num# 1))))
+               get-previous-post# (fn [num#] (if (= num# 1) nil (get-post-url (- num# 1))))
+               num-file-map# (map (fn [file# num#] {:num num#
+                                                    :file file#
+                                                    :post-url (get-post-url num#)
+                                                    :next-page (get-next-post# num#)
+                                                    :previous-page (get-previous-post# num#)})
+                                  files#
+                                  (range 1 (+ 1 total#)))]
            (dorun
-             (for [tuple# index-file-map#]
-               (let [~'page_ (merge (load-markdown (.getAbsolutePath (val tuple#))) {:index (key tuple#)})
-                     output# (io/file (kfile/find-dest) (string/replace (:post-url-pattern (config/read-config))
-                                                                        num-ptn (str (key tuple#))))]
+             (for [post# num-file-map#]
+               (let [~'page_ (merge (load-markdown (.getAbsolutePath (:file post#))) (dissoc post#
+                                                                                             :num
+                                                                                             :file
+                                                                                             :post-url))
+                     output# (io/file (kfile/find-dest) (string/replace (:post-url post#) #"^/" ""))]
                  (kfile/touch output#)
                  (spit output# ~body)))))))))
 
-(defn get-post-url [num]
-  (let [ptn (:post-url-pattern (config/read-config))]
-    (string/replace ptn num-ptn (str num))))
+
 
 (defmacro def-excerpts [head-url tail-url-ptn num-perpage body]
   `(def hiccup#
