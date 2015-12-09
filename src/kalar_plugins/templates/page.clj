@@ -36,11 +36,24 @@
     (println mds-with-neighbors)
     ))
 
+(defn- gen-paginate-page [dir]
+  (letfn [(create-paginate [total paginate-url-pattern]
+            (cons "index.html"
+                  (map #(str/replace paginate-url-pattern #":num" (str %)) (range 2 (+ 1 total)))))]
+    (let [paginate (:paginate (config/read-config))
+          mds (map #(hp/load-md-excerpt (.getAbsolutePath %)) (.listFiles (io/file dir)))
+          mdchunks (partition-all paginate mds)
+          paginate (create-paginate (count mdchunks) (:paginate-path (config/read-config)))
+          paginate2 (create-neighbor-url paginate)
+          result (map (fn [md p pn] (merge {:posts md} {:current-page p}  pn)) mdchunks paginate paginate2)]
+      (first result))))
+
 (plugin/defkalar-plugin
   page
   plugin/KalarPlugin
   (load-plugin
     [this]
+    (gen-paginate-page (:posts-dir (config/read-config)))
     (dorun
       (for [file (.listFiles (io/file (:page-dir (config/read-config))))]
         (compile-md file)))
