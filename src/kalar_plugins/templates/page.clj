@@ -20,19 +20,18 @@
     (spit dst ((var-get (resolve (symbol fnc))) md))))
 
 (defn- create-neighbor-url [urls]
+  "REFACTORING create current-page"
   (map (fn [p n] {:previous-page p :next-page n})
        (cons nil (drop-last urls))
        (concat (rest urls) '(nil))))
 
 (defn- compile-serial-mds [dir]
   (let [files (.listFiles (io/file dir))
-        mds (map #(merge (hp/load-md-excerpt (.getAbsolutePath %))
-                         {:url (get-dst-path (.getAbsolutePath %))})
-                 files)
-        neighbor-urls (create-neighbor-url (map #(.getAbsolutePath (:url %)) mds))
+        mds (map #(hp/load-markdown (.getAbsolutePath %)) files)
+        neighbor-urls (create-neighbor-url (map #(:url %) mds))
         mds-with-neighbors (map (fn [m n] (merge m n)) mds neighbor-urls)
         ]
-    (comment (partition-all))
+    (println mds-with-neighbors)
     ))
 
 (defn- gen-paginate-page [dir]
