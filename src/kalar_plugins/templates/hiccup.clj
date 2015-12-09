@@ -38,8 +38,10 @@
   (let [input    (new StringReader (slurp file))
         output   (new StringWriter)
         metadata (md/md-to-html input output :parse-meta? true :heading-anchors true)
-        html     (.toString output)]
-    (merge metadata {:body html})))
+        html     (.toString output)
+        url (string/replace (string/replace file (re-pattern (str "^" (kfile/find-resources-dir))) "") #"\..*$" ".html")]
+    (println url)
+    (merge metadata {:body html :url url})))
 
 (defn load-md-excerpt [^String md]
   (let [compiled (load-markdown md)
