@@ -33,7 +33,6 @@
         mds-with-neighbors (map (fn [m n] (merge m n)) mds neighbor-urls)
         ]
     (comment (partition-all))
-    (println mds-with-neighbors)
     ))
 
 (defn- gen-paginate-page [dir]
@@ -45,8 +44,14 @@
           mdchunks (partition-all paginate mds)
           paginate (create-paginate (count mdchunks) (:paginate-path (config/read-config)))
           paginate2 (create-neighbor-url paginate)
-          result (map (fn [md p pn] (merge {:posts md} {:current-page p}  pn)) mdchunks paginate paginate2)]
-      (first result))))
+          result (map (fn [md p pn] (merge {:posts md} {:current-page p}  pn)) mdchunks paginate paginate2)
+          func (:paginate-template (config/read-config))]
+      (require (symbol (str/replace func  #"/.*"  "")))
+      (dorun
+        (for [chunk result]
+          (let [dst  (kfile/get-dst  (:current-page chunk))]
+            (kfile/touch dst)
+            (spit dst ((var-get (resolve func)) chunk))))))))
 
 (plugin/defkalar-plugin
   page
