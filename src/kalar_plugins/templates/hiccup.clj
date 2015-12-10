@@ -39,8 +39,10 @@
         output   (new StringWriter)
         metadata (md/md-to-html input output :parse-meta? true :heading-anchors true)
         html     (.toString output)
-        url (string/replace (string/replace file (re-pattern (str "^" (kfile/find-resources-dir))) "") #"\..*$" ".html")]
-    (merge metadata {:body html :url url})))
+        url (string/replace (string/replace file (re-pattern (str "^" (kfile/find-resources-dir))) "") #"\..*$" ".html")
+        dest-file (io/file (kfile/find-dest) (string/replace url #"^/" ""))]
+
+    (merge metadata {:body html :url url :dest-file dest-file})))
 
 (defn load-md-excerpt [^String md]
   (let [compiled (load-markdown md)

@@ -29,10 +29,14 @@
   (let [files (.listFiles (io/file dir))
         mds (map #(hp/load-markdown (.getAbsolutePath %)) files)
         neighbor-urls (create-neighbor-url (map #(:url %) mds))
-        mds-with-neighbors (map (fn [m n] (merge m n)) mds neighbor-urls)
-        ]
-    (println mds-with-neighbors)
-    ))
+        mds-with-neighbors (map (fn [m n] (merge m n)) mds neighbor-urls)]
+    (dorun
+      (for [md mds-with-neighbors]
+        (let [func (-> md :template first)]
+          (kfile/touch (:dest-file md))
+          (require (symbol (str/replace func  #"/.*"  "")))
+          (spit (:dest-file md) ((var-get (resolve (symbol func))) md))
+          )))))
 
 (defn- gen-paginate-page [dir]
   (letfn [(create-paginate [total paginate-url-pattern]
