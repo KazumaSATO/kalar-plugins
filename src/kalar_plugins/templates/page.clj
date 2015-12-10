@@ -1,18 +1,35 @@
 (ns kalar-plugins.templates.page
   (:require [kalar-core.plugin :as plugin]
-            [kalar-plugins.templates.hiccup :as hp]
             [clojure.java.io :as io]
             [clojure.string :as str]
+            [markdown.core :as md]
+            [clojure.string :as string]
+            [net.cgrand.enlive-html :as ehtml]
             [kalar-core.config :as config]
-            [kalar-core.file :as kfile]
-            [hiccup.page :as hpage]))
+            [kalar-core.file :as kfile])
+  (:import (java.io StringWriter StringReader)))
 
 (defn- get-dst-path [^String src-path]
   (kfile/get-dst (str/replace src-path #"\..*$" ".html")))
 
+(defn load-markdown [^String file]
+  (let [input    (new StringReader (slurp file))
+        output   (new StringWriter)
+        metadata (md/md-to-html input output :parse-meta? true :heading-anchors true)
+        html     (.toString output)
+        url (string/replace (string/replace file (re-pattern (str "^" (kfile/find-resources-dir))) "") #"\..*$" ".html")
+        dest-file (io/file (kfile/find-dest) (string/replace url #"^/" ""))]
+
+    (merge metadata {:body html :url url :dest-file dest-file})))
+
+(defn load-md-excerpt [^String md]
+  (let [compiled (load-markdown md)
+        excerpt  (-> (ehtml/select (ehtml/html-resource (StringReader. (:body compiled))) [:p]) first ehtml/text)]
+    (dissoc (merge compiled {:excerpt excerpt}) :body)))
+
 (defn- compile-md [file]
   (let [file-path (.getAbsolutePath file)
-        md (hp/load-markdown file-path)
+        md (load-markdown file-path)
         dst (get-dst-path file-path)
         fnc (-> md :template first)]
     (kfile/touch dst)
@@ -27,7 +44,7 @@
 
 (defn- compile-serial-mds [dir]
   (let [files (.listFiles (io/file dir))
-        mds (map #(hp/load-markdown (.getAbsolutePath %)) files)
+        mds (map #(load-markdown (.getAbsolutePath %)) files)
         neighbor-urls (create-neighbor-url (map #(:url %) mds))
         mds-with-neighbors (map (fn [m n] (merge m n)) mds neighbor-urls)]
     (dorun
@@ -43,7 +60,7 @@
             (cons "index.html"
                   (map #(str/replace paginate-url-pattern #":num" (str %)) (range 2 (+ 1 total)))))]
     (let [paginate (:paginate (config/read-config))
-          mds (map #(hp/load-md-excerpt (.getAbsolutePath %)) (.listFiles (io/file dir)))
+          mds (map #(load-md-excerpt (.getAbsolutePath %)) (.listFiles (io/file dir)))
           mdchunks (partition-all paginate mds)
           paginate (create-paginate (count mdchunks) (:paginate-path (config/read-config)))
           paginate2 (create-neighbor-url paginate)
