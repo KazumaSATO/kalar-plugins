@@ -7,20 +7,30 @@
             [net.cgrand.enlive-html :as ehtml]
             [kalar-core.config :as config]
             [kalar-core.file :as kfile])
-  (:import (java.io StringWriter StringReader)))
+  (:import (java.io StringWriter StringReader)
+           (java.text SimpleDateFormat)))
 
 (defn- get-dst-path [^String src-path]
   (kfile/get-dst (str/replace src-path #"\..*$" ".html")))
 
+
+(def ^:private date-formatter (SimpleDateFormat. "yyyy-MM-dd"))
+
+(defn- format-date [date-str] (.parse date-formatter date-str))
+
+(defn- extract-date-from-filename [filename]
+  (-> (re-matcher  #"^\d{4}-\d{1,2}-\d{1,2}" filename) re-find format-date))
+
+
 (defn load-markdown [^String file]
   (let [input    (new StringReader (slurp file))
         output   (new StringWriter)
+        date     (extract-date-from-filename (.getName (io/file file)))
         metadata (md/md-to-html input output :parse-meta? true :heading-anchors true)
         html     (.toString output)
         url (string/replace (string/replace file (re-pattern (str "^" (kfile/find-resources-dir))) "") #"\..*$" ".html")
         dest-file (io/file (kfile/find-dest) (string/replace url #"^/" ""))]
-
-    (merge metadata {:body html :url url :dest-file dest-file})))
+    (merge metadata {:body html :url url :dest-file dest-file :date date})))
 
 (defn load-md-excerpt [^String md]
   (let [compiled (load-markdown md)
