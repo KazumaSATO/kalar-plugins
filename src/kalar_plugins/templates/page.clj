@@ -28,7 +28,12 @@
         date     (extract-date-from-filename (.getName (io/file file)))
         metadata (md/md-to-html input output :parse-meta? true :heading-anchors true)
         html     (.toString output)
-        url (string/replace (string/replace file (re-pattern (str "^" (kfile/find-resources-dir))) "") #"\..*$" ".html")
+        url (if (nil? (-> metadata :link first))
+              (string/replace
+                (string/replace file (re-pattern (str "^" (kfile/find-resources-dir))) "")
+                #"\..*$"
+                ".html")
+              (-> metadata :link first))
         dest-file (io/file (kfile/find-dest) (string/replace url #"^/" ""))]
     (merge metadata {:body html :url url :dest-file dest-file :date date})))
 
@@ -45,7 +50,7 @@
 (defn- compile-md [file]
   (let [file-path (.getAbsolutePath file)
         md (load-markdown file-path)
-        dst (get-dst-path file-path)
+        dst (:dest-file md)
         fnc (-> md :template first)]
     (kfile/touch dst)
     (require (symbol (str/replace fnc  #"/.*"  "")))
