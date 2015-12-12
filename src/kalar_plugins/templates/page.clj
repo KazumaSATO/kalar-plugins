@@ -27,6 +27,11 @@
         excerpt  (-> (ehtml/select (ehtml/html-resource (StringReader. (:body compiled))) [:p]) first ehtml/text)]
     (dissoc (merge compiled {:excerpt excerpt}) :body)))
 
+(defn load-recent-posts [num]
+  (let [posts-dir (-> (config/read-config) :posts-dir)
+        mds (take num (-> (.listFiles (io/file posts-dir)) reverse))]
+    (map #(load-markdown (.getAbsolutePath %)) mds)))
+
 (defn- compile-md [file]
   (let [file-path (.getAbsolutePath file)
         md (load-markdown file-path)
