@@ -10,10 +10,6 @@
   (:import (java.io StringWriter StringReader)
            (java.text SimpleDateFormat)))
 
-(defn- get-dst-path [^String src-path]
-  (kfile/get-dst (str/replace src-path #"\..*$" ".html")))
-
-
 (def ^:private date-formatter (SimpleDateFormat. "yyyy-MM-dd"))
 
 (defn- format-date [date-str] (.parse date-formatter date-str))
@@ -80,7 +76,7 @@
             (cons "index.html"
                   (map #(str/replace paginate-url-pattern #":num" (str %)) (range 2 (+ 1 total)))))]
     (let [paginate (:paginate (config/read-config))
-          mds (map #(load-md-excerpt (.getAbsolutePath %)) (.listFiles (io/file dir)))
+          mds (map #(load-md-excerpt (.getAbsolutePath %)) (-> dir io/file .listFiles reverse))
           mdchunks (partition-all paginate mds)
           paginate (create-paginate (count mdchunks) (:paginate-path (config/read-config)))
           paginate2 (create-neighbor-url paginate)
