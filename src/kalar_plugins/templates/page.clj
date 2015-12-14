@@ -59,7 +59,7 @@
        (concat (rest urls) '(nil))))
 
 (defn- compile-serial-mds [dir]
-  (let [files (.listFiles (io/file dir))
+  (let [files (reverse (.listFiles (io/file dir)))
         mds (map #(load-markdown (.getAbsolutePath %)) files)
         neighbor-urls (create-neighbor-url (map #(:url %) mds))
         mds-with-neighbors (map (fn [m n] (merge m n)) mds neighbor-urls)]
