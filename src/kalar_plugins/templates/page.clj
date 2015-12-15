@@ -17,15 +17,17 @@
     [(extract-date-from-filename [filename]
        (-> (re-matcher  #"^\d{4}-\d{1,2}-\d{1,2}" filename) re-find format-date))
      (format-date [date-str] (.parse date-formatter date-str))
-     (build-dest [relative-file]
-       (string/replace relative-file #"(\d{4})-(\d{1,2})-(\d{1,2})-(.+)\.(md|markdown)$" "$1/$2/$3/$4.html"))]
+     (build-dest [filename]
+       (string/replace filename #"(\d{4})-(\d{1,2})-(\d{1,2})-(.+)\.(md|markdown)$" "$1/$2/$3/$4.html"))]
+
     (let [input    (new StringReader (slurp file))
           output   (new StringWriter)
-          date     (extract-date-from-filename (.getName (io/file file)))
+          filename (.getName (io/file file))
+          date     (extract-date-from-filename filename)
           metadata (md/md-to-html input output :parse-meta? true :heading-anchors true)
           html     (.toString output)
           url (if (nil? (-> metadata :link first))
-                (build-dest (string/replace file (re-pattern (str "^" (kfile/find-resources-dir))) ""))
+                (str (:journal-path (config/read-config)) "/" (build-dest filename))
                 (-> metadata :link first))
           dest-file (io/file (kfile/find-dest) (string/replace url #"^/" ""))]
       (merge metadata {:body html :url url :dest-file dest-file :date date}))))

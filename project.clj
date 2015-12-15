@@ -1,4 +1,4 @@
-(defproject kalar-plugins "0.1.4"
+(defproject kalar-plugins "0.1.5"
   :description "plugins of kalar"
   :url "https://github.com/KazumaSATO/kalar-plugins"
   :license {:name "The MIT License"
