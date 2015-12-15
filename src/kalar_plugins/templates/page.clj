@@ -12,26 +12,24 @@
 
 (def ^:private date-formatter (SimpleDateFormat. "yyyy-MM-dd"))
 
-(defn- format-date [date-str] (.parse date-formatter date-str))
-
-(defn- extract-date-from-filename [filename]
-  (-> (re-matcher  #"^\d{4}-\d{1,2}-\d{1,2}" filename) re-find format-date))
-
-
 (defn load-markdown [^String file]
-  (let [input    (new StringReader (slurp file))
-        output   (new StringWriter)
-        date     (extract-date-from-filename (.getName (io/file file)))
-        metadata (md/md-to-html input output :parse-meta? true :heading-anchors true)
-        html     (.toString output)
-        url (if (nil? (-> metadata :link first))
-              (string/replace
-                (string/replace file (re-pattern (str "^" (kfile/find-resources-dir))) "")
-                #"\..*$"
-                ".html")
-              (-> metadata :link first))
-        dest-file (io/file (kfile/find-dest) (string/replace url #"^/" ""))]
-    (merge metadata {:body html :url url :dest-file dest-file :date date})))
+  (letfn
+    [(extract-date-from-filename [filename]
+       (-> (re-matcher  #"^\d{4}-\d{1,2}-\d{1,2}" filename) re-find format-date))
+     (format-date [date-str] (.parse date-formatter date-str))
+     (build-dest [relative-file]
+       (string/replace relative-file #"(\d{4})-(\d{1,2})-(\d{1,2})-(.+)\.(md|markdown)$" "$1/$2/$3/$4.html"))]
+    (let [input    (new StringReader (slurp file))
+          output   (new StringWriter)
+          date     (extract-date-from-filename (.getName (io/file file)))
+          metadata (md/md-to-html input output :parse-meta? true :heading-anchors true)
+          html     (.toString output)
+          url (if (nil? (-> metadata :link first))
+                (build-dest (string/replace file (re-pattern (str "^" (kfile/find-resources-dir))) ""))
+                (-> metadata :link first))
+          dest-file (io/file (kfile/find-dest) (string/replace url #"^/" ""))]
+      (merge metadata {:body html :url url :dest-file dest-file :date date}))))
+
 
 (defn load-md-excerpt [^String md]
   (let [compiled (load-markdown md)
