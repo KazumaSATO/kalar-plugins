@@ -1,4 +1,4 @@
-(defproject kalar-plugins "0.1.4-SNAPSHOT"
+(defproject kalar-plugins "0.1.4"
   :description "plugins of kalar"
   :url "https://github.com/KazumaSATO/kalar-plugins"
   :license {:name "The MIT License"
@@ -8,5 +8,4 @@
                  [kalar-core "0.1.2"]
                  [markdown-clj "0.9.82"]
                  [org.apache.lucene/lucene-core "5.3.1"]
-                 [enlive "1.1.6"]
-                 ])
+                 [enlive "1.1.6"]])
