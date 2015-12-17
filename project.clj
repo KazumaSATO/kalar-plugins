@@ -7,5 +7,6 @@
                  [me.raynes/fs "1.4.6"]
                  [kalar-core "0.1.2"]
                  [markdown-clj "0.9.82"]
+                 [org.lesscss/lesscss "1.7.0.1.1"]
                  [org.apache.lucene/lucene-core "5.3.1"]
                  [enlive "1.1.6"]])
