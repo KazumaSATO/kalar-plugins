@@ -5,7 +5,7 @@
             :url "http://opensource.org/licenses/mit-license.php"}
   :dependencies [[org.clojure/clojure "1.7.0"]
                  [me.raynes/fs "1.4.6"]
-                 [kalar-core "0.1.2"]
+                 [kalar-core "0.1.3"]
                  [markdown-clj "0.9.82"]
                  [org.lesscss/lesscss "1.7.0.1.1"]
                  [org.apache.lucene/lucene-core "5.3.1"]

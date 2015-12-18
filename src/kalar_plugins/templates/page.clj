@@ -1,6 +1,5 @@
 (ns kalar-plugins.templates.page
-  (:require [kalar-core.plugin :as plugin]
-            [clojure.java.io :as io]
+  (:require [clojure.java.io :as io]
             [clojure.string :as str]
             [markdown.core :as md]
             [clojure.string :as string]
@@ -89,16 +88,9 @@
             (kfile/touch dst)
             (spit dst ((var-get (resolve func)) chunk))))))))
 
-(plugin/defkalar-plugin
-  page
-  plugin/KalarPlugin
-  (load-plugin
-    [this]
-    (gen-paginate-page (:posts-dir (config/read-config)))
-    (dorun
-      (for [file (.listFiles (io/file (:page-dir (config/read-config))))]
-        (compile-md file)))
-    (compile-serial-mds (:posts-dir (config/read-config)))
-    ))
-
-
+(defn load-plugin []
+  (gen-paginate-page (:posts-dir (config/read-config)))
+  (dorun
+    (for [file (.listFiles (io/file (:page-dir (config/read-config))))]
+      (compile-md file)))
+  (compile-serial-mds (:posts-dir (config/read-config))))

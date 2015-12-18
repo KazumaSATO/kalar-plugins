@@ -1,6 +1,5 @@
 (ns kalar-plugins.file.cpy
-  (:require [kalar-core.plugin :as plugin]
-            [kalar-core.config :as config]
+  (:require [kalar-core.config :as config]
             [kalar-core.file :as file]
             [me.raynes.fs :as raynes]
             [clojure.java.io :as io]))
@@ -15,13 +14,6 @@
       (raynes/copy+ s d)
       (raynes/copy-dir s d))))
 
-(plugin/defkalar-plugin
-  cpy
-  plugin/KalarPlugin
-  (load-plugin
-    [this]
-    (dorun
-      (for [cpysrc (:cpy (config/read-config))]
-        (get-copy-target cpysrc)))))
-
-
+(defn load-plugin []
+  (doseq [cpysrc (:cpy (config/read-config))]
+    (get-copy-target cpysrc)))

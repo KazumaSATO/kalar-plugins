@@ -1,6 +1,5 @@
 (ns kalar-plugins.css.less
-  (:require [kalar-core.plugin :as plugin]
-            [clojure.java.io :as io])
+  (:require [clojure.java.io :as io])
   (:import (org.lesscss LessCompiler))
   )
 
@@ -14,13 +13,5 @@
   nil)
 
 (defn- find-less-lec [dir]
-  
   nil)
 
-(plugin/defkalar-plugin
-  less
-  plugin/KalarPlugin
-  (load-plugin
-    [this]
-    nil
-    ))
