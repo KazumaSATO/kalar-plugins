@@ -22,18 +22,20 @@
                     (str coll (extract-text-from-tag e))
                     (str coll e)))
                 " "
-                children)))]
+                children)))
+          (create-title-text-pairs [post-dir]
+            (for [post (.listFiles post-dir)]
+              (let [postmap (create-map (.getAbsolutePath post))]
+                {:filepath (string/replace
+                             (:file postmap)
+                             (re-pattern (str "^" (.getAbsolutePath post-dir) "/"))
+                             "")
+                 :text (reduce
+                         (fn [coll e]
+                           (str coll (extract-text-from-tag e)))
+                         " "
+                         (ehtml/html-resource (StringReader. (:html postmap))))})))]
 
     (let [post-dir (io/file (:posts-dir (config/read-config)))
-          posts (.listFiles post-dir)]
-      (doseq [post posts]
-        (let [postmap (create-map (.getAbsolutePath post))]
-          {:filepath (string/replace
-                       (:file postmap)
-                       (re-pattern (str "^" (.getAbsolutePath post-dir) "/"))
-                       "")
-           :text (reduce
-                   (fn [coll e]
-                     (str coll (extract-text-from-tag e)))
-                   " "
-                   (ehtml/html-resource (StringReader. (:html postmap))))})))))
+          title-text-pairs (create-title-text-pairs post-dir)]
+      (println title-text-pairs))))
