@@ -5,7 +5,9 @@
     [clojure.string :as string]
     [net.cgrand.enlive-html :as ehtml]
     [clojure.java.io :as io])
-  (:import (java.io StringWriter StringReader)))
+  (:import (java.io StringWriter StringReader)
+           (java.util HashMap)
+           (com.ranceworks.nanao.vsm SimilarityCalculator)))
 
 (defn relation [& args]
   (letfn [(create-map [filepath]
@@ -34,8 +36,23 @@
                          (fn [coll e]
                            (str coll (extract-text-from-tag e)))
                          " "
-                         (ehtml/html-resource (StringReader. (:html postmap))))})))]
+                         (ehtml/html-resource (StringReader. (:html postmap))))})))
+          (prepare-pairs [title-text-pairs]
+            (let [mp (new HashMap)]
+              (doseq [pair title-text-pairs]
+                (.put mp (:filepath pair) (:text pair)))
+              mp))
+          (create-compared-pairs [pairs]
+            (for [pair pairs]
+              (assoc pair :compared (remove (fn [x] (= (:filepath pair) (:filepath x))) pairs))))
+          ]
 
     (let [post-dir (io/file (:posts-dir (config/read-config)))
           title-text-pairs (create-title-text-pairs post-dir)]
-      (println title-text-pairs))))
+      (doseq [e (create-compared-pairs title-text-pairs)]
+        (let [row
+              (concat (:filepath e)
+                      (map (fn [ef] (.getKey ef))
+                           (SimilarityCalculator/calcSimilarity (:text e) (prepare-pairs (:compared e)))))]
+          (spit ".__related_posts" "" :append true)
+          )))))
