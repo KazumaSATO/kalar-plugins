@@ -4,10 +4,13 @@
     [markdown.core :as md]
     [clojure.string :as string]
     [net.cgrand.enlive-html :as ehtml]
-    [clojure.java.io :as io])
+    [clojure.java.io :as io]
+    [clojure-csv.core :as csv])
   (:import (java.io StringWriter StringReader)
            (java.util HashMap)
            (com.ranceworks.nanao.vsm SimilarityCalculator)))
+
+(def cache-name ".__related_posts")
 
 (defn relation [& args]
   (letfn [(create-map [filepath]
@@ -49,10 +52,12 @@
 
     (let [post-dir (io/file (:posts-dir (config/read-config)))
           title-text-pairs (create-title-text-pairs post-dir)]
+      (.delete (io/file cache-name))
       (doseq [e (create-compared-pairs title-text-pairs)]
         (let [row
-              (concat (:filepath e)
+              (vector  (into (vector (:filepath e))
                       (map (fn [ef] (.getKey ef))
-                           (SimilarityCalculator/calcSimilarity (:text e) (prepare-pairs (:compared e)))))]
-          (spit ".__related_posts" "" :append true)
+                           (SimilarityCalculator/calcSimilarity (:text e) (prepare-pairs (:compared e))))))]
+          (println row)
+          (spit cache-name (csv/write-csv row) :append true)
           )))))

@@ -5,6 +5,7 @@
             :url "http://opensource.org/licenses/mit-license.php"}
   :dependencies [[org.clojure/clojure "1.7.0"]
                  [com.ranceworks/nanao_2.11 "1.0.1"]
+                 [clojure-csv "2.0.1"]
                  [me.raynes/fs "1.4.6"]
                  [markdown-clj "0.9.82"]
                  [org.lesscss/lesscss "1.7.0.1.1"]

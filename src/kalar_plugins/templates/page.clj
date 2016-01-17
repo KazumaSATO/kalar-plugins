@@ -5,6 +5,7 @@
             [clojure.string :as string]
             [net.cgrand.enlive-html :as ehtml]
             [kalar-core.config :as config]
+            [clojure-csv.core :as csv]
             [kalar-core.file :as kfile])
   (:import (java.io StringWriter StringReader)
            (java.text SimpleDateFormat)))
@@ -29,7 +30,7 @@
                 (str (:journal-path (config/read-config)) "/" (build-dest filename))
                 (-> metadata :link first))
           dest-file (io/file (kfile/find-dest) (string/replace url #"^/" ""))]
-      (merge metadata {:body html :url url :dest-file dest-file :date date}))))
+      (merge metadata {:body html :url url :dest-file dest-file :date date :src file}))))
 
 
 (defn load-md-excerpt [^String md]
@@ -41,6 +42,13 @@
   (let [posts-dir (-> (config/read-config) :posts-dir)
         mds (take num (-> (.listFiles (io/file posts-dir)) reverse))]
     (map #(load-markdown (.getAbsolutePath %)) mds)))
+
+(defn load-related-posts [filename num]
+  (let [related (csv/parse-csv (slurp ".__related_posts"))
+        posts-dir (-> (config/read-config) :posts-dir)]
+    (map #(load-markdown (.getAbsolutePath (io/file posts-dir %)))
+         (take num (rest (first (filter (fn [line] (re-find (re-pattern (str (first line) "$")) filename))
+                                        related)))))))
 
 (defn- compile-md [file]
   (let [file-path (.getAbsolutePath file)
