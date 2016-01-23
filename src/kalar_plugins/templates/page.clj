@@ -79,6 +79,7 @@
           )))))
 
 (defn- gen-paginate-page [dir]
+  "dir is the directory where posts are put."
   (letfn [(create-paginate [total paginate-url-pattern]
             (cons "index.html"
                   (map #(str/replace paginate-url-pattern #":num" (str %)) (range 2 (+ 1 total)))))]
