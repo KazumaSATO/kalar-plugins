@@ -3,6 +3,7 @@
             [clojure.string :as str]
             [markdown.core :as md]
             [clojure.string :as string]
+            [clojure.set :as set]
             [net.cgrand.enlive-html :as ehtml]
             [kalar-core.config :as config]
             [clojure-csv.core :as csv]
@@ -38,7 +39,7 @@
   ([md]
     (let [input (new StringReader (slurp md))
           output (new StringWriter)
-          metadata (md/md-to-html input outpu :parse-meta? true :heading-anchors true)
+          metadata (md/md-to-html input output :parse-meta? true :heading-anchors true)
           body (.toString output)]
       (merge metadata {:body body}))))
 
@@ -56,6 +57,35 @@
     (require (symbol (str/replace  template #"/.*"  "")))
     (spit output ((var-get (resolve (symbol template))) compiled-page))))
 
+(defn- internationalize
+  [filenames langs]
+  (let [regex-of-lang-cds #"\.(en)\.[^\.]+$"
+        default-files (remove (fn [filename] (re-seq regex-of-lang-cds filename)) filenames)
+        i18-files (reduce (fn [acc lang]
+                            (merge acc {(keyword lang)
+                                        (filter
+                                          (fn [filename]
+                                            (re-seq (re-pattern (str "\\." (name lang) "\\.[^\\.]+$"))
+                                                    filename))
+                                          filenames)}))
+                          {}
+                          langs)]
+    (into {:default default-files}
+          (first
+            (map (fn [lang files]
+                   (let [multi-lang-files (map (fn [file] (string/replace  file #"\.\w{2}\.([^\.]+)$" ".$1")) files)
+                         uni-lang-files (into () (set/difference (set default-files)  (set multi-lang-files)))]
+                     {lang (into files uni-lang-files)}))
+                 (keys i18-files)
+                 (vals i18-files))))
+    ))
+
+(comment (defn- compile-pages []
+           (letfn [(f [] nil)]
+             (let [config (config/read-config)
+                   i18n (:i18n config)
+                   pages (.listFiles (io/file (:page-dir config)))]
+               nil))))
 
 (defn load-md-excerpt [^String md]
   (let [compiled (load-markdown md)
