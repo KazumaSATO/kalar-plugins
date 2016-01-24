@@ -44,15 +44,17 @@
       (merge metadata {:body body}))))
 
 (defn- read-page
-  ([page] (load-md page)) ; add link
+  ([page] (let [loaded-md  (load-md page)]
+            (assoc loaded-md :link (first (:link loaded-md))
+                             :template (first (:template loaded-md)))))
   ([page lang-cd]
-    (let [loaded-md (load-md page)]
-      (assoc loaded-md :link (str "/" lang-cd (:link loaded-md))))))
+    (let [loaded-md (load-md (name page))]
+      (assoc loaded-md :link (str "/" (name lang-cd) (first (:link loaded-md)))
+                       :template (first (:template loaded-md))))))
 
 (defn- write-page [compiled-page]
-  "To be implemented."
-  (let [output (io/file (kfile/find-dest) (:link compiled-page))
-        template (-> compiled-page :template first)]
+  (let [output (io/file (:dest (config/read-config)) (string/replace (:link compiled-page) #"^/" ""))
+        template  (:template compiled-page)]
     (kfile/touch output)
     (require (symbol (str/replace  template #"/.*"  "")))
     (spit output ((var-get (resolve (symbol template))) compiled-page))))
@@ -80,12 +82,15 @@
                  (vals i18-files))))
     ))
 
-(comment (defn- compile-pages []
-           (letfn [(f [] nil)]
-             (let [config (config/read-config)
-                   i18n (:i18n config)
-                   pages (.listFiles (io/file (:page-dir config)))]
-               nil))))
+(defn- compile-pages
+  ([files i18n]
+   (let [pages-per-lang (internationalize (map #(.getAbsolutePath %) files) (map #(keyword %) i18n))
+         read-pages (reduce (fn [acc lang] (into acc (map (fn [page] (read-page page lang)) (get pages-per-lang lang))))
+                            (map #(read-page %) (:default pages-per-lang))
+                            (keys (dissoc pages-per-lang :default)))]
+     (doseq [page read-pages] (write-page page))))
+  ([]
+   (compile-pages (.listFiles (io/file (:page-dir (config/read-config)))) (:i18n (config/read-config)))))
 
 (defn load-md-excerpt [^String md]
   (let [compiled (load-markdown md)
