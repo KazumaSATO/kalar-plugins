@@ -1,7 +1,7 @@
-(ns kalar-core.file.tracker
+(ns tamaki-core.file.tracker
   (:require [clojure.java.io :as io]
             [clojure.data :as data]
-            [kalar-core.config :as config])
+            [kalar-core.config :as config])                 ; FIXME
   (:import (clojure.lang PersistentList)))
 
 
