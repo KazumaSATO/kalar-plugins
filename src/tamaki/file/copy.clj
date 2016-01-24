@@ -29,7 +29,8 @@
     (let [names (into () (:copy (config/read-config)))
           srcs (map #(-> % io/resource io/file) names)
           dests (map #(io/file (:dest (config/read-config)) %) names)
-          src-dest-map (map #({:src %1 :dest %2}) srcs dests)]
+          src-dest-map (map (fn [src dest] {:src src :dest dest})  srcs dests)]
+
       (doseq [pair (filter #(.isDirectory (:src %)) src-dest-map)]
         (copy-dir (:src pair) (:dest pair)))
       (doseq [pair (remove #(.isDirectory (:src %)) src-dest-map)]

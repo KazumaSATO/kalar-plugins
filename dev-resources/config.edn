@@ -4,5 +4,5 @@
  :pagination-pattern "page:num.html"
  :posts-per-page 3
  :pagination-template kalar-template.template/paginate-template
- :copy #{"css" "demo.html"}
+ :copy #{"css" "html/foo.html"}
 }
