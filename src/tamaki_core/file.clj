@@ -1,5 +1,6 @@
 (ns tamaki-core.file
   (:require [clojure.java.io :as io]
+            [me.raynes.fs :as raynes]
             [tamaki-core.config :as config]))
 
 
@@ -12,4 +13,7 @@
 (defn clean-dest
   "Make the destination empty."
   ([] (clean-dest (-> (config/read-config) :dest io/file)))
-  ([dest] (doseq [file (.listFiles dest)] (.delete file))))
+  ([dest] (doseq [file (.listFiles dest)]
+            (if (raynes/directory? file)
+              (raynes/delete-dir file)
+              (.delete file)))))
