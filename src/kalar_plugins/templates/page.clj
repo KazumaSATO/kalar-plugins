@@ -40,8 +40,15 @@
           output (new StringWriter)
           metadata (md/md-to-html input outpu :parse-meta? true :heading-anchors true)
           body (.toString output)]
-      (merge metadata {:body body}))
-    ))
+      (merge metadata {:body body}))))
+
+(defn- read-page
+  ([page] (load-md page)) ; add link
+  ([page lang-cd]
+    (let [loaded-md (load-md page)]
+      (assoc loaded-md :link (str "/" lang-cd (:link loaded-md))))))
+
+
 
 (defn load-md-excerpt [^String md]
   (let [compiled (load-markdown md)
