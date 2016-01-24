@@ -1,10 +1,10 @@
 (ns tamaki-core.file.tracker
   (:require [clojure.java.io :as io]
             [clojure.data :as data]
-            [kalar-core.config :as config])                 ; FIXME
+            [tamaki-core.config :as config])
   (:import (clojure.lang PersistentList)))
 
-
+; FIXME
 
 (defn- create-modtime-map [^String directory]
   (letfn
@@ -23,9 +23,6 @@
        )]
     (get-child-map (io/file directory))))
 
-  (comment ([^PersistentList lst]
-   (let [a (reduce #(merge %1 %2) {} (for [l lst](create-modtime-map l)))]
-     a)))
 
 (defn- find-removed [old current]
   (keys (first (data/diff old current))))
