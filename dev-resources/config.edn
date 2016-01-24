@@ -1,14 +1,8 @@
-{:plugins [kalar-plugins.templates.page
-           kalar-plugins.file.cpy]
- :title "Lorem Ipsum"
- :dest "dev-resources/_site"
- :posts-dir "dev-resources/posts"
- :paginate-path "page:num.html"
- :journal-path "/blog"
- :paginate 3
+{:dest "dev-resources/_site"
+ :post-dir "dev-resources/posts"
  :page-dir "dev-resources/pages"
- :paginate-template kalar-template.template/paginate-template
- :post-url-pattern "/posts/post:num.html"
- :cpy ["css" "fonts" "js"]
- :i18n #{"en"}
+ :pagination-pattern "page:num.html"
+ :posts-per-page 3
+ :pagination-template kalar-template.template/paginate-template
+ :copy ["css" "fonts" "js"]
 }
