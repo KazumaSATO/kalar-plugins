@@ -48,6 +48,13 @@
     (let [loaded-md (load-md page)]
       (assoc loaded-md :link (str "/" lang-cd (:link loaded-md))))))
 
+(defn- write-page [compiled-page]
+  "To be implemented."
+  (let [output (io/file (kfile/find-dest) (:link compiled-page))
+        template (-> compiled-page :template first)]
+    (kfile/touch output)
+    (require (symbol (str/replace  template #"/.*"  "")))
+    (spit output ((var-get (resolve (symbol template))) compiled-page))))
 
 
 (defn load-md-excerpt [^String md]
