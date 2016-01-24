@@ -12,26 +12,36 @@
 
 (def ^:private date-formatter (SimpleDateFormat. "yyyy-MM-dd"))
 
-(defn load-markdown [^String file]
-  (letfn
-    [(extract-date-from-filename [filename]
-       (-> (re-matcher  #"^\d{4}-\d{1,2}-\d{1,2}" filename) re-find format-date))
-     (format-date [date-str] (.parse date-formatter date-str))
-     (build-dest [filename]
-       (string/replace filename #"(\d{4})-(\d{1,2})-(\d{1,2})-(.+)\.(md|markdown)$" "$1/$2/$3/$4.html"))]
+(defn load-markdown
+  ([^String file]
+   (letfn
+     [(extract-date-from-filename [filename]
+        (-> (re-matcher  #"^\d{4}-\d{1,2}-\d{1,2}" filename) re-find format-date))
+      (format-date [date-str] (.parse date-formatter date-str))
+      (build-dest [filename]
+        (string/replace filename #"(\d{4})-(\d{1,2})-(\d{1,2})-(.+)\.(md|markdown)$" "$1/$2/$3/$4.html"))]
 
-    (let [input    (new StringReader (slurp file))
-          output   (new StringWriter)
-          filename (.getName (io/file file))
-          date     (extract-date-from-filename filename)
-          metadata (md/md-to-html input output :parse-meta? true :heading-anchors true)
-          html     (.toString output)
-          url (if (nil? (-> metadata :link first))
-                (str (:journal-path (config/read-config)) "/" (build-dest filename))
-                (-> metadata :link first))
-          dest-file (io/file (kfile/find-dest) (string/replace url #"^/" ""))]
-      (merge metadata {:body html :url url :dest-file dest-file :date date :src file}))))
+     (let [input    (new StringReader (slurp file))
+           output   (new StringWriter)
+           filename (.getName (io/file file))
+           date     (extract-date-from-filename filename)
+           metadata (md/md-to-html input output :parse-meta? true :heading-anchors true)
+           html     (.toString output)
+           url (if (nil? (-> metadata :link first))
+                 (str (:journal-path (config/read-config)) "/" (build-dest filename))
+                 (-> metadata :link first))
+           dest-file (io/file (kfile/find-dest) (string/replace url #"^/" ""))]
+       (merge metadata {:body html :url url :dest-file dest-file :date date :src file})))))
 
+(defn- load-md
+  "Load a markdown file."
+  ([md]
+    (let [input (new StringReader (slurp md))
+          output (new StringWriter)
+          metadata (md/md-to-html input outpu :parse-meta? true :heading-anchors true)
+          body (.toString output)]
+      (merge metadata {:body body}))
+    ))
 
 (defn load-md-excerpt [^String md]
   (let [compiled (load-markdown md)
@@ -79,11 +89,12 @@
           )))))
 
 (defn- gen-paginate-page [dir]
-  "dir is the directory where posts are put."
+  ^{:doc "dir is the directory where posts are put."}
   (letfn [(create-paginate [total paginate-url-pattern]
             (cons "index.html"
                   (map #(str/replace paginate-url-pattern #":num" (str %)) (range 2 (+ 1 total)))))]
     (let [paginate (:paginate (config/read-config))
+          ;;
           mds (map #(load-md-excerpt (.getAbsolutePath %)) (-> dir io/file .listFiles reverse))
           mdchunks (partition-all paginate mds)
           paginate (create-paginate (count mdchunks) (:paginate-path (config/read-config)))
