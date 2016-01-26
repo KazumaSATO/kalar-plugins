@@ -20,10 +20,9 @@
           output (new StringWriter)
           metadata (md/md-to-html input output :parse-meta? true :heading-anchors true)
           body (.toString output)]
-      (merge metadata {:body body
-                       :title (-> metadata :title first)
-                       :link (-> metadata :link first)
-                       :template (-> metadata :template first)}))))
+      (merge {:body body} {:metadata (merge metadata {:title (-> metadata :title first)
+                                                      :link (-> metadata :link first)
+                                                      :template (-> metadata :template first)})}))))
 
 (defn load-markdown
   ([^String file]
