@@ -1,7 +1,7 @@
-(ns kalar-plugins.templates.page-test
+(ns tamaki.template.page-test
   (:require [clojure.test :refer :all]
             [clojure.java.io :as io]
-            [kalar-plugins.templates.page :as page]))
+            [tamaki.template.page :as page]))
 
 (deftest tests
   (testing "Internationalize pages."

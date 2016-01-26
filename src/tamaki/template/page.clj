@@ -1,4 +1,4 @@
-(ns kalar-plugins.templates.page
+(ns tamaki.template.page
   (:require [clojure.java.io :as io]
             [clojure.string :as str]
             [markdown.core :as md]

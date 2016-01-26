@@ -8,4 +8,4 @@
   (testing "Copy."
     (file/clean-dest)
     (let [result (copy/copy)]
-       (is nil result))))
+      (is (= nil result)))))
