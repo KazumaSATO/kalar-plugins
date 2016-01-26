@@ -13,6 +13,18 @@
 
 (def ^:private date-formatter (SimpleDateFormat. "yyyy-MM-dd"))
 
+(defn- load-md
+  "Load a markdown file."
+  ([md]
+    (let [input (new StringReader (slurp md))
+          output (new StringWriter)
+          metadata (md/md-to-html input output :parse-meta? true :heading-anchors true)
+          body (.toString output)]
+      (merge metadata {:body body
+                       :title (-> metadata :title first)
+                       :link (-> metadata :link first)
+                       :template (-> metadata :template first)}))))
+
 (defn load-markdown
   ([^String file]
    (letfn
@@ -34,14 +46,7 @@
            dest-file (io/file (kfile/find-dest) (string/replace url #"^/" ""))]
        (merge metadata {:body html :url url :dest-file dest-file :date date :src file})))))
 
-(defn- load-md
-  "Load a markdown file."
-  ([md]
-    (let [input (new StringReader (slurp md))
-          output (new StringWriter)
-          metadata (md/md-to-html input output :parse-meta? true :heading-anchors true)
-          body (.toString output)]
-      (merge metadata {:body body}))))
+
 
 (defn- read-page
   ([page] (let [loaded-md  (load-md page)]

@@ -7,10 +7,11 @@
   (testing "Internationalize pages."
     (is (= (#'page/internationalize  '("foo.en.md" "foo.md" "bar.md") '(:en))
            '{:default ("foo.md" "bar.md"), :en ("bar.md" "foo.en.md")})))
-
+  ;FIXME
   (testing "Compile pages."
     (is (= (#'page/compile-pages  (.listFiles (io/file (io/resource "pages"))) #{"en"})
-           nil))))
+           nil)))
+  )
 
 
 
