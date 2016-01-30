@@ -18,9 +18,12 @@
     (let [loaded (#'page/load-md  (-> test-md  .getAbsolutePath))]
       (is (some? (-> loaded :metadata :title)))
       ))
+
   (testing "Write a html file about a map generated from a markdown file."
-    (let [loaded (#'page/load-md (-> test-md  .getAbsolutePath))]
-      (is (= nil (#'page/write-page loaded)))))
+    (let [loaded (#'page/load-md (-> test-md  .getAbsolutePath))
+          mod (#'page/read-page loaded)]
+      (is (= nil (#'page/write-page mod)))))
+
   (testing "Complile the markdowns for the pages."
     (is (= nil (#'page/compile-mds (-> test-md
                                        .getParentFile
@@ -29,6 +32,8 @@
 
 (deftest post-tests
   (testing "Load a mardkwon file for a post."
-    (println (#'page/load-postmd  (find-res "posts/2011-12-01-post.md")))
-    ))
+    (let [post (#'page/load-postmd  (find-res "posts/2011-12-01-post.md"))]
+      (is (= (:link post) "/2011/12/01/post.html"))))
+
+  )
 

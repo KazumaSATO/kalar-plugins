@@ -21,8 +21,12 @@
           metadata (md/md-to-html input output :parse-meta? true :heading-anchors true)
           body (.toString output)]
       (merge {:body body :src md} {:metadata (merge metadata {:title (-> metadata :title first)
-                                                      :link (-> metadata :link first)
                                                       :template (-> metadata :template first)})}))))
+
+(defn- read-page [md]
+  (let [metadata (:metadata md)]
+    (assoc md :metadata (assoc metadata :link (-> metadata :link first)))
+    ))
 
 (defn- write-page [page]
   (let [output (io/file (:dest (config/read-config)) (string/replace (-> page :metadata :link) #"^/" ""))
@@ -34,7 +38,9 @@
 (defn- compile-mds
   ([page-root-dir]
    (doseq [md (-> page-root-dir io/file .listFiles)]
-     (-> md .getAbsolutePath load-md write-page)))
+     (let [loaded (-> md .getAbsolutePath load-md)
+           mod-loaded (read-page loaded)]
+       (write-page mod-loaded))))
   ([] (compile-mds (:page-dir (config/read-config)))))
 
 
@@ -49,6 +55,16 @@
          link (build-link (-> path io/file .getName))
          output (str (:dest (config/read-config)) link)]
     (assoc md :link link :output output))))
+
+(defn- create-neighbor-link [links]
+  (map (fn [p n] {:previous-page p :next-page n})
+       (cons nil (drop-last links))
+       (concat (rest links) '(nil))))
+
+(defn- append-neightbor-links [posts]
+  (let [neighbor-links (create-neighbor-link (map #(:link %) posts))]
+    (map (fn [m n] (merge m n)) posts neighbor-links)))
+
 ;
 
 (defn load-markdown
@@ -72,14 +88,7 @@
            dest-file (io/file  (string/replace url #"^/" ""))]
        (merge metadata {:body html :url url :dest-file dest-file :date date :src file})))))
 
-(defn- read-page
-  ([page] (let [loaded-md  (load-md page)]
-            (assoc loaded-md :link (first (:link loaded-md))
-                             :template (first (:template loaded-md)))))
-  ([page lang-cd]
-    (let [loaded-md (load-md (name page))]
-      (assoc loaded-md :link (str "/" (name lang-cd) (first (:link loaded-md)))
-                       :template (first (:template loaded-md))))))
+
 (defn- internationalize
   [filenames langs]
   (let [regex-of-lang-cds #"\.(en)\.[^\.]+$"
