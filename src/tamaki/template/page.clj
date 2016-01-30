@@ -25,8 +25,8 @@
                                                       :template (-> metadata :template first)})}))))
 
 (defn- write-page [page]
-  (let [output (io/file (:dest (config/read-config)) (string/replace (:link page) #"^/" ""))
-        template  (:template page)]
+  (let [output (io/file (:dest (config/read-config)) (string/replace (-> page :metadata :link) #"^/" ""))
+        template  (-> page :metadata :template)]
     (tfile/create-empty-file output)
     (require (symbol (str/replace  template #"/.*"  "")))
     (spit output ((var-get (resolve (symbol template))) page))))
