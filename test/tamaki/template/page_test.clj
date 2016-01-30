@@ -3,16 +3,34 @@
             [clojure.java.io :as io]
             [tamaki.template.page :as page]))
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 (deftest tests
-  (testing "Internationalize pages."
-    (is (= (#'page/internationalize  '("foo.en.md" "foo.md" "bar.md") '(:en))
-           '{:default ("foo.md" "bar.md"), :en ("bar.md" "foo.en.md")})))
-  ;FIXME
-  (testing "Compile pages."
-    (is (= (#'page/compile-pages  (.listFiles (io/file (io/resource "pages"))) #{"en"})
-           nil)))
-  )
-
-
+  (testing "Load markdown."
+    (let [loaded (#'page/load-md  (-> "tamaki/template/test.md" io/resource io/file .getAbsolutePath))]
+      (is (some? (-> loaded :metadata :title)))
+      )))
 
 (defn page-template [md] (str md))

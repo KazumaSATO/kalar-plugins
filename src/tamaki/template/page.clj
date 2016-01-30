@@ -31,6 +31,37 @@
     (require (symbol (str/replace  template #"/.*"  "")))
     (spit output ((var-get (resolve (symbol template))) page))))
 
+(defn- read-page
+  ([page] (let [loaded-md  (load-md page)]
+            (assoc loaded-md :link (first (:link loaded-md))
+                             :template (first (:template loaded-md)))))
+  ([page lang-cd]
+    (let [loaded-md (load-md (name page))]
+      (assoc loaded-md :link (str "/" (name lang-cd) (first (:link loaded-md)))
+                       :template (first (:template loaded-md))))))
+(defn- internationalize
+  [filenames langs]
+  (let [regex-of-lang-cds #"\.(en)\.[^\.]+$"
+        default-files (remove (fn [filename] (re-seq regex-of-lang-cds filename)) filenames)
+        i18-files (reduce (fn [acc lang]
+                            (merge acc {(keyword lang)
+                                        (filter
+                                          (fn [filename]
+                                            (re-seq (re-pattern (str "\\." (name lang) "\\.[^\\.]+$"))
+                                                    filename))
+                                          filenames)}))
+                          {}
+                          langs)]
+    (into {:default default-files}
+          (first
+            (map (fn [lang files]
+                   (let [multi-lang-files (map (fn [file] (string/replace  file #"\.\w{2}\.([^\.]+)$" ".$1")) files)
+                         uni-lang-files (into () (set/difference (set default-files)  (set multi-lang-files)))]
+                     {lang (into files uni-lang-files)}))
+                 (keys i18-files)
+                 (vals i18-files))))
+    ))
+
 (defn- compile-pages
   ([files i18n]
    (let [pages-per-lang (internationalize (map #(.getAbsolutePath %) files) (map #(keyword %) i18n))
@@ -59,44 +90,16 @@
            url (if (nil? (-> metadata :link first))
                  (str (:journal-path (config/read-config)) "/" (build-dest filename))
                  (-> metadata :link first))
-           dest-file (io/file (kfile/find-dest) (string/replace url #"^/" ""))]
+           dest-file (io/file  (string/replace url #"^/" ""))]
        (merge metadata {:body html :url url :dest-file dest-file :date date :src file})))))
 
 
 
-(defn- read-page
-  ([page] (let [loaded-md  (load-md page)]
-            (assoc loaded-md :link (first (:link loaded-md))
-                             :template (first (:template loaded-md)))))
-  ([page lang-cd]
-    (let [loaded-md (load-md (name page))]
-      (assoc loaded-md :link (str "/" (name lang-cd) (first (:link loaded-md)))
-                       :template (first (:template loaded-md))))))
 
 
 
-(defn- internationalize
-  [filenames langs]
-  (let [regex-of-lang-cds #"\.(en)\.[^\.]+$"
-        default-files (remove (fn [filename] (re-seq regex-of-lang-cds filename)) filenames)
-        i18-files (reduce (fn [acc lang]
-                            (merge acc {(keyword lang)
-                                        (filter
-                                          (fn [filename]
-                                            (re-seq (re-pattern (str "\\." (name lang) "\\.[^\\.]+$"))
-                                                    filename))
-                                          filenames)}))
-                          {}
-                          langs)]
-    (into {:default default-files}
-          (first
-            (map (fn [lang files]
-                   (let [multi-lang-files (map (fn [file] (string/replace  file #"\.\w{2}\.([^\.]+)$" ".$1")) files)
-                         uni-lang-files (into () (set/difference (set default-files)  (set multi-lang-files)))]
-                     {lang (into files uni-lang-files)}))
-                 (keys i18-files)
-                 (vals i18-files))))
-    ))
+
+
 
 
 
@@ -122,7 +125,7 @@
         md (load-markdown file-path)
         dst (:dest-file md)
         fnc (-> md :template first)]
-    (kfile/touch dst)
+    (tfile/create-empty-file dst)
     (require (symbol (str/replace fnc  #"/.*"  "")))
     (spit dst ((var-get (resolve (symbol fnc))) md))))
 
@@ -140,7 +143,7 @@
     (dorun
       (for [md mds-with-neighbors]
         (let [func (-> md :template first)]
-          (kfile/touch (:dest-file md))
+          (tfile/create-empty-file (:dest-file md))
           (require (symbol (str/replace func  #"/.*"  "")))
           (spit (:dest-file md) ((var-get (resolve (symbol func))) md))
           )))))
@@ -161,8 +164,8 @@
       (require (symbol (str/replace func  #"/.*"  "")))
       (dorun
         (for [chunk result]
-          (let [dst  (kfile/get-dst  (:current-page chunk))]
-            (kfile/touch dst)
+          (let [dst  ((:dest (config/read-config))  (:current-page chunk))]
+            (tfile/create-empty-file dst)
             (spit dst ((var-get (resolve func)) chunk))))))))
 
 (defn load-plugin []
