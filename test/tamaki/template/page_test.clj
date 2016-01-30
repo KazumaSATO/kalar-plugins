@@ -35,5 +35,11 @@
     (let [post (#'page/load-postmd  (find-res "posts/2011-12-01-post.md"))]
       (is (= (:link post) "/2011/12/01/post.html"))))
 
+  (testing "Load posts with the neighbor post links"
+    (let [posts (map (fn [file] (let [path (-> file .getAbsolutePath)]
+                                  (#'page/load-postmd path)))
+                     (-> "posts" find-res io/file .listFiles))
+          appended (#'page/append-neightbor-links posts)]
+      (is (some? appended))))
   )
 
