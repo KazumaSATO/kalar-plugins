@@ -7,7 +7,7 @@
             [net.cgrand.enlive-html :as ehtml]
             [kalar-core.config :as config]
             [clojure-csv.core :as csv]
-            [kalar-core.file :as kfile])
+            [tamaki-core.file :as tfile])
   (:import (java.io StringWriter StringReader)
            (java.text SimpleDateFormat)))
 
@@ -23,6 +23,23 @@
       (merge {:body body :src md} {:metadata (merge metadata {:title (-> metadata :title first)
                                                       :link (-> metadata :link first)
                                                       :template (-> metadata :template first)})}))))
+
+(defn- write-page [page]
+  (let [output (io/file (:dest (config/read-config)) (string/replace (:link page) #"^/" ""))
+        template  (:template page)]
+    (tfile/create-empty-file output)
+    (require (symbol (str/replace  template #"/.*"  "")))
+    (spit output ((var-get (resolve (symbol template))) page))))
+
+(defn- compile-pages
+  ([files i18n]
+   (let [pages-per-lang (internationalize (map #(.getAbsolutePath %) files) (map #(keyword %) i18n))
+         read-pages (reduce (fn [acc lang] (into acc (map (fn [page] (read-page page lang)) (get pages-per-lang lang))))
+                            (map #(read-page %) (:default pages-per-lang))
+                            (keys (dissoc pages-per-lang :default)))]
+     (doseq [page read-pages] (write-page page))))
+  ([]
+   (compile-pages (.listFiles (io/file (:page-dir (config/read-config)))) (:i18n (config/read-config)))))
 
 (defn load-markdown
   ([^String file]
@@ -56,12 +73,7 @@
       (assoc loaded-md :link (str "/" (name lang-cd) (first (:link loaded-md)))
                        :template (first (:template loaded-md))))))
 
-(defn- write-page [compiled-page]
-  (let [output (io/file (:dest (config/read-config)) (string/replace (:link compiled-page) #"^/" ""))
-        template  (:template compiled-page)]
-    (kfile/touch output)
-    (require (symbol (str/replace  template #"/.*"  "")))
-    (spit output ((var-get (resolve (symbol template))) compiled-page))))
+
 
 (defn- internationalize
   [filenames langs]
@@ -86,15 +98,7 @@
                  (vals i18-files))))
     ))
 
-(defn- compile-pages
-  ([files i18n]
-   (let [pages-per-lang (internationalize (map #(.getAbsolutePath %) files) (map #(keyword %) i18n))
-         read-pages (reduce (fn [acc lang] (into acc (map (fn [page] (read-page page lang)) (get pages-per-lang lang))))
-                            (map #(read-page %) (:default pages-per-lang))
-                            (keys (dissoc pages-per-lang :default)))]
-     (doseq [page read-pages] (write-page page))))
-  ([]
-   (compile-pages (.listFiles (io/file (:page-dir (config/read-config)))) (:i18n (config/read-config)))))
+
 
 (defn load-md-excerpt [^String md]
   (let [compiled (load-markdown md)
