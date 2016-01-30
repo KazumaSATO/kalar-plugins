@@ -33,7 +33,11 @@
       ))
   (testing "Write a html file about a map generated from a markdown file."
     (let [loaded (#'page/load-md (-> "tamaki/template/test.md" io/resource io/file .getAbsolutePath))]
-      (is (= nil (#'page/write-page loaded))))
-  ))
+      (is (= nil (#'page/write-page loaded)))))
+  (testing "Complile the markdowns for the pages."
+    (is (= nil (#'page/compile-mds (-> "tamaki/template/test.md"
+                                       io/resource io/file
+                                       .getParentFile
+                                       .getAbsolutePath))))))
 
 (defn page-template [md] (str md))

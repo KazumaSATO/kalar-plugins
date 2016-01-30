@@ -31,6 +31,14 @@
     (require (symbol (str/replace  template #"/.*"  "")))
     (spit output ((var-get (resolve (symbol template))) page))))
 
+(defn- compile-mds
+  ([page-root-dir]
+   (println page-root-dir)
+   (doseq [md (-> page-root-dir io/file .listFiles)]
+     (-> md .getAbsolutePath load-md write-page)))
+  ([] (compile-mds (:page-dir (config/read-config)))))
+;
+
 (defn- read-page
   ([page] (let [loaded-md  (load-md page)]
             (assoc loaded-md :link (first (:link loaded-md))
@@ -62,15 +70,7 @@
                  (vals i18-files))))
     ))
 
-(defn- compile-pages
-  ([files i18n]
-   (let [pages-per-lang (internationalize (map #(.getAbsolutePath %) files) (map #(keyword %) i18n))
-         read-pages (reduce (fn [acc lang] (into acc (map (fn [page] (read-page page lang)) (get pages-per-lang lang))))
-                            (map #(read-page %) (:default pages-per-lang))
-                            (keys (dissoc pages-per-lang :default)))]
-     (doseq [page read-pages] (write-page page))))
-  ([]
-   (compile-pages (.listFiles (io/file (:page-dir (config/read-config)))) (:i18n (config/read-config)))))
+
 
 (defn load-markdown
   ([^String file]
