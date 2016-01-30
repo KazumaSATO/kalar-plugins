@@ -32,8 +32,7 @@
       (is (some? (-> loaded :metadata :title)))
       ))
   (testing "Write a html file about a map generated from a markdown file."
-    (let [config (config/read-config)
-          loaded (#'page/load-md (-> "tamaki/template/test.md" io/resource io/file .getAbsolutePath))]
+    (let [loaded (#'page/load-md (-> "tamaki/template/test.md" io/resource io/file .getAbsolutePath))]
       (is (= nil (#'page/write-page loaded))))
   ))
 
