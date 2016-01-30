@@ -10,7 +10,7 @@
             [tamaki-core.file :as tfile])
   (:import (java.io StringWriter StringReader)
            (java.text SimpleDateFormat)))
-
+-
 (def ^:private date-formatter (SimpleDateFormat. "yyyy-MM-dd"))
 
 (defn- load-md
@@ -33,7 +33,6 @@
 
 (defn- compile-mds
   ([page-root-dir]
-   (println page-root-dir)
    (doseq [md (-> page-root-dir io/file .listFiles)]
      (-> md .getAbsolutePath load-md write-page)))
   ([] (compile-mds (:page-dir (config/read-config)))))
