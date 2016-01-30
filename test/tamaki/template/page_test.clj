@@ -8,7 +8,8 @@
 
 (def ^:private test-md (-> "tamaki/template/pages/test.md" io/resource io/file) )
 
-(defn-  find-res [path] (io/file (io/resource "tamaki/template") path))
+(defn-  find-res [path]
+  (str "dev-resources/tamaki/template/" path))
 
 (defn page-template [md] (str md))
 

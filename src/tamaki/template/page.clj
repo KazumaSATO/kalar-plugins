@@ -46,9 +46,9 @@
                                                  #"(\d{4})-(\d{1,2})-(\d{1,2})-(.+)\.(md|markdown)$"
                                                  "/$1/$2/$3/$4.html"))]
    (let [md (load-md path)
-         link (build-link path)
-         output (str (:dest config/read-config) link)]
-    (assoc md :link output output))))
+         link (build-link (-> path io/file .getName))
+         output (str (:dest (config/read-config)) link)]
+    (assoc md :link link :output output))))
 ;
 
 (defn load-markdown
