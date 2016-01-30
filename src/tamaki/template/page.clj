@@ -37,7 +37,41 @@
    (doseq [md (-> page-root-dir io/file .listFiles)]
      (-> md .getAbsolutePath load-md write-page)))
   ([] (compile-mds (:page-dir (config/read-config)))))
+
+
+(defn- load-postmd [path]
+  (letfn [(extract-date-from-filename [filename]
+            (-> (re-matcher  #"^\d{4}-\d{1,2}-\d{1,2}" filename) re-find format-date))
+          (format-date [date-str] (.parse date-formatter date-str))
+          (build-link [filename] (string/replace filename
+                                                 #"(\d{4})-(\d{1,2})-(\d{1,2})-(.+)\.(md|markdown)$"
+                                                 "/$1/$2/$3/$4.html"))]
+   (let [md (load-md path)
+         link (build-link path)
+         output (str (:dest config/read-config) link)]
+    (assoc md :link output output))))
 ;
+
+(defn load-markdown
+  ([^String file]
+   (letfn
+     [(extract-date-from-filename [filename]
+        (-> (re-matcher  #"^\d{4}-\d{1,2}-\d{1,2}" filename) re-find format-date))
+      (format-date [date-str] (.parse date-formatter date-str))
+      (build-dest [filename]
+        (string/replace filename #"(\d{4})-(\d{1,2})-(\d{1,2})-(.+)\.(md|markdown)$" "$1/$2/$3/$4.html"))]
+
+     (let [input    (new StringReader (slurp file))
+           output   (new StringWriter)
+           filename (.getName (io/file file))
+           date     (extract-date-from-filename filename)
+           metadata (md/md-to-html input output :parse-meta? true :heading-anchors true)
+           html     (.toString output)
+           url (if (nil? (-> metadata :link first))
+                 (str (:journal-path (config/read-config)) "/" (build-dest filename))
+                 (-> metadata :link first))
+           dest-file (io/file  (string/replace url #"^/" ""))]
+       (merge metadata {:body html :url url :dest-file dest-file :date date :src file})))))
 
 (defn- read-page
   ([page] (let [loaded-md  (load-md page)]
@@ -69,39 +103,6 @@
                  (keys i18-files)
                  (vals i18-files))))
     ))
-
-
-
-(defn load-markdown
-  ([^String file]
-   (letfn
-     [(extract-date-from-filename [filename]
-        (-> (re-matcher  #"^\d{4}-\d{1,2}-\d{1,2}" filename) re-find format-date))
-      (format-date [date-str] (.parse date-formatter date-str))
-      (build-dest [filename]
-        (string/replace filename #"(\d{4})-(\d{1,2})-(\d{1,2})-(.+)\.(md|markdown)$" "$1/$2/$3/$4.html"))]
-
-     (let [input    (new StringReader (slurp file))
-           output   (new StringWriter)
-           filename (.getName (io/file file))
-           date     (extract-date-from-filename filename)
-           metadata (md/md-to-html input output :parse-meta? true :heading-anchors true)
-           html     (.toString output)
-           url (if (nil? (-> metadata :link first))
-                 (str (:journal-path (config/read-config)) "/" (build-dest filename))
-                 (-> metadata :link first))
-           dest-file (io/file  (string/replace url #"^/" ""))]
-       (merge metadata {:body html :url url :dest-file dest-file :date date :src file})))))
-
-
-
-
-
-
-
-
-
-
 
 (defn load-md-excerpt [^String md]
   (let [compiled (load-markdown md)
