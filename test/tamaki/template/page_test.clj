@@ -44,5 +44,7 @@
 
   (testing "Load a post except."
     (is (some? (:excerpt (#'page/load-post-excerpt (find-res "posts/2011-12-01-post.md"))))))
-  )
+
+  (testing "Load recent posts"
+    (is (= 3 (-> (#'page/load-recent-posts 3 (find-res "posts"))  count)))))
 

@@ -5,7 +5,7 @@
             [clojure.string :as string]
             [clojure.set :as set]
             [net.cgrand.enlive-html :as ehtml]
-            [kalar-core.config :as config]
+            [tamaki-core.config :as config]
             [clojure-csv.core :as csv]
             [tamaki-core.file :as tfile])
   (:import (java.io StringWriter StringReader)
@@ -69,6 +69,13 @@
   (let [compiled (load-postmd md)
         excerpt  (-> (ehtml/select (ehtml/html-resource (StringReader. (:body compiled))) [:p]) first ehtml/text)]
     (dissoc (assoc compiled :excerpt excerpt) :body)))
+
+(defn load-recent-posts
+  ([num post-dir]
+   (let [mds (take num (-> (.listFiles (io/file post-dir)) reverse))]
+     (map #(load-postmd (.getAbsolutePath %)) mds)))
+  ([]
+   (load-recent-posts (:recent-post-num (config/read-config)) (-> (config/read-config) :post-dir))))
 ;
 
 (defn load-markdown
@@ -121,10 +128,7 @@
         excerpt  (-> (ehtml/select (ehtml/html-resource (StringReader. (:body compiled))) [:p]) first ehtml/text)]
     (dissoc (merge compiled {:excerpt excerpt}) :body)))
 
-(defn load-recent-posts [num]
-  (let [posts-dir (-> (config/read-config) :posts-dir)
-        mds (take num (-> (.listFiles (io/file posts-dir)) reverse))]
-    (map #(load-markdown (.getAbsolutePath %)) mds)))
+
 
 (defn load-related-posts [filename num]
   (let [related (csv/parse-csv (slurp ".__related_posts"))
