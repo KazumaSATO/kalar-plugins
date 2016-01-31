@@ -35,7 +35,7 @@
     (require (symbol (str/replace  template #"/.*"  "")))
     (spit output ((var-get (resolve (symbol template))) page))))
 
-(defn- compile-mds
+(defn compile-mds
   ([page-root-dir]
    (doseq [md (-> page-root-dir io/file .listFiles)]
      (let [loaded (-> md .getAbsolutePath load-md)
@@ -77,7 +77,7 @@
   ([]
    (load-recent-posts (:recent-post-num (config/read-config)) (-> (config/read-config) :post-dir))))
 
-(defn- gen-paginate-page [dir]
+(defn gen-paginate-page [dir]
   ^{:doc "dir is the directory where posts are put."}
   (letfn [(create-paginate-files [total paginate-url-pattern]
             (cons "index.html"
@@ -98,7 +98,7 @@
           (tfile/create-empty-file dst)
           (spit dst ((var-get (resolve template)) page)))))))
 
-(defn- compile-postmds [dir]
+(defn compile-postmds [dir]
   (let [posts (map #(-> % .getAbsolutePath load-postmd) (reverse (.listFiles (io/file dir))))
         posts-with-neighbors (append-neightbor-links posts)]
       (doseq [post posts-with-neighbors]
