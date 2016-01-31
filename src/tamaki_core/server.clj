@@ -14,12 +14,16 @@
       (require plugin)
       ((-> (symbol (str plugin "/" 'load-plugin)) resolve var-get)))))
 
-(defn init []
+(defn tcompile []
   (tfile/clean-dest)
   (cpy/copy)
   (page/compile-mds)
   (page/gen-paginate-page (-> (read-config) :post-dir))
   (page/compile-postmds (-> (read-config) :post-dir)))
+
+(defn init [] (tcompile))
+
+
 
 (defroutes handler
            (GET ":prefix{.*}/" [prefix] (redirect (str prefix "/index.html")))
