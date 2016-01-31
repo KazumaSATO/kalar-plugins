@@ -41,5 +41,8 @@
                      (-> "posts" find-res io/file .listFiles))
           appended (#'page/append-neightbor-links posts)]
       (is (some? appended))))
+
+  (testing "Load a post except."
+    (is (some? (:excerpt (#'page/load-post-excerpt (find-res "posts/2011-12-01-post.md"))))))
   )
 

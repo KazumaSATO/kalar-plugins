@@ -10,7 +10,7 @@
             [tamaki-core.file :as tfile])
   (:import (java.io StringWriter StringReader)
            (java.text SimpleDateFormat)))
--
+
 (def ^:private date-formatter (SimpleDateFormat. "yyyy-MM-dd"))
 
 (defn- load-md
@@ -65,6 +65,10 @@
   (let [neighbor-links (create-neighbor-link (map #(:link %) posts))]
     (map (fn [m n] (merge m n)) posts neighbor-links)))
 
+(defn load-post-excerpt [md]
+  (let [compiled (load-postmd md)
+        excerpt  (-> (ehtml/select (ehtml/html-resource (StringReader. (:body compiled))) [:p]) first ehtml/text)]
+    (dissoc (assoc compiled :excerpt excerpt) :body)))
 ;
 
 (defn load-markdown
