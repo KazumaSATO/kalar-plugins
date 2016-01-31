@@ -46,5 +46,8 @@
     (is (some? (:excerpt (#'page/load-post-excerpt (find-res "posts/2011-12-01-post.md"))))))
 
   (testing "Load recent posts"
-    (is (= 3 (-> (#'page/load-recent-posts 3 (find-res "posts"))  count)))))
+    (is (= 3 (-> (#'page/load-recent-posts 3 (find-res "posts"))  count))))
+
+  (testing "Generate the paginate pages"
+    (is (nil? (#'page/gen-paginate-page (find-res "posts"))))))
 

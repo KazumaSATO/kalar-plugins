@@ -94,7 +94,7 @@
           template (:pagination-template (config/read-config))]
       (require (symbol (str/replace template  #"/.*"  "")))
       (doseq [page pages]
-        (let [dst (str (:dest (config/read-config)) (:current-page chunk))]
+        (let [dst (str (:dest (config/read-config)) "/" (:current-page page))]
           (tfile/create-empty-file dst)
           (spit dst ((var-get (resolve template)) page)))))))
 ;
