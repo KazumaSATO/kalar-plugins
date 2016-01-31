@@ -1,6 +1,6 @@
 (defproject tamaki "0.1.8-SNAPSHOT"
-  :description "plugins of kalar"
-  :url "https://github.com/satokazuma/kalar-plugins"
+  :description "Tamaki, a static site generator"
+  :url "https://github.com/satokazuma/tamaki"
   :license {:name "The MIT License"
             :url "http://opensource.org/licenses/mit-license.php"}
   :dependencies [[org.clojure/clojure "1.7.0"]
