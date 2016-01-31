@@ -45,16 +45,15 @@
 
 
 (defn- load-postmd [path]
-  (letfn [(extract-date-from-filename [filename]
-            (-> (re-matcher  #"^\d{4}-\d{1,2}-\d{1,2}" filename) re-find format-date))
-          (format-date [date-str] (.parse date-formatter date-str))
+  (letfn [(extract-date-from-filename [filename] (-> (re-seq #"^\d{4}-\d{1,2}-\d{1,2}" filename) first))
           (build-link [filename] (string/replace filename
                                                  #"(\d{4})-(\d{1,2})-(\d{1,2})-(.+)\.(md|markdown)$"
                                                  "/$1/$2/$3/$4.html"))]
    (let [md (load-md path)
-         link (build-link (-> path io/file .getName))
+         filename (-> path io/file .getName)
+         link (build-link filename)
          output (str (:dest (config/read-config)) link)]
-    (assoc md :link link :output output))))
+    (assoc md :link link :output output :date (extract-date-from-filename filename)))))
 
 (defn- create-neighbor-link [links]
   (map (fn [p n] {:previous-page p :next-page n})
@@ -88,7 +87,7 @@
           output-files (create-paginate-files (count parted-excerpts) (:pagination-pattern (config/read-config)))
           neighbor-links (create-neighbor-link output-files)
           pages (map (fn [excerpt current-page neighbors] (merge {:posts excerpt} {:current-page current-page}  neighbors))
-                      excerpts
+                      parted-excerpts
                       output-files
                       neighbor-links)
           template (:pagination-template (config/read-config))]
