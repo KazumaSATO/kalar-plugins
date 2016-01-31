@@ -76,6 +76,27 @@
      (map #(load-postmd (.getAbsolutePath %)) mds)))
   ([]
    (load-recent-posts (:recent-post-num (config/read-config)) (-> (config/read-config) :post-dir))))
+
+(defn- gen-paginate-page [dir]
+  ^{:doc "dir is the directory where posts are put."}
+  (letfn [(create-paginate-files [total paginate-url-pattern]
+            (cons "index.html"
+                  (map #(str/replace paginate-url-pattern #":num" (str %)) (range 2 (+ 1 total)))))]
+    (let [num-per-page (:posts-per-page (config/read-config))
+          excerpts (map #(load-post-excerpt (.getAbsolutePath %)) (-> dir io/file .listFiles reverse))
+          parted-excerpts (partition-all num-per-page excerpts)
+          output-files (create-paginate-files (count parted-excerpts) (:pagination-pattern (config/read-config)))
+          neighbor-links (create-neighbor-link output-files)
+          pages (map (fn [excerpt current-page neighbors] (merge {:posts excerpt} {:current-page current-page}  neighbors))
+                      excerpts
+                      output-files
+                      neighbor-links)
+          template (:pagination-template (config/read-config))]
+      (require (symbol (str/replace template  #"/.*"  "")))
+      (doseq [page pages]
+        (let [dst (str (:dest (config/read-config)) (:current-page chunk))]
+          (tfile/create-empty-file dst)
+          (spit dst ((var-get (resolve template)) page)))))))
 ;
 
 (defn load-markdown
@@ -165,25 +186,6 @@
           (spit (:dest-file md) ((var-get (resolve (symbol func))) md))
           )))))
 
-(defn- gen-paginate-page [dir]
-  ^{:doc "dir is the directory where posts are put."}
-  (letfn [(create-paginate [total paginate-url-pattern]
-            (cons "index.html"
-                  (map #(str/replace paginate-url-pattern #":num" (str %)) (range 2 (+ 1 total)))))]
-    (let [paginate (:paginate (config/read-config))
-          ;;
-          mds (map #(load-md-excerpt (.getAbsolutePath %)) (-> dir io/file .listFiles reverse))
-          mdchunks (partition-all paginate mds)
-          paginate (create-paginate (count mdchunks) (:paginate-path (config/read-config)))
-          paginate2 (create-neighbor-url paginate)
-          result (map (fn [md p pn] (merge {:posts md} {:current-page p}  pn)) mdchunks paginate paginate2)
-          func (:paginate-template (config/read-config))]
-      (require (symbol (str/replace func  #"/.*"  "")))
-      (dorun
-        (for [chunk result]
-          (let [dst  ((:dest (config/read-config))  (:current-page chunk))]
-            (tfile/create-empty-file dst)
-            (spit dst ((var-get (resolve func)) chunk))))))))
 
 (defn load-plugin []
   (gen-paginate-page (:posts-dir (config/read-config)))
