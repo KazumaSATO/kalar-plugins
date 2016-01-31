@@ -49,5 +49,9 @@
     (is (= 3 (-> (#'page/load-recent-posts 3 (find-res "posts"))  count))))
 
   (testing "Generate the paginate pages"
-    (is (nil? (#'page/gen-paginate-page (find-res "posts"))))))
+    (is (nil? (#'page/gen-paginate-page (find-res "posts")))))
+
+   (testing "Generate the posts"
+    (is (nil? (#'page/compile-postmds (find-res "posts")))))
+  )
 

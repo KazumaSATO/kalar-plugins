@@ -97,6 +97,16 @@
         (let [dst (str (:dest (config/read-config)) "/" (:current-page page))]
           (tfile/create-empty-file dst)
           (spit dst ((var-get (resolve template)) page)))))))
+
+(defn- compile-postmds [dir]
+  (let [posts (map #(-> % .getAbsolutePath load-postmd) (reverse (.listFiles (io/file dir))))
+        posts-with-neighbors (append-neightbor-links posts)]
+      (doseq [post posts-with-neighbors]
+        (let [template (-> post :metadata :template)
+              output (str (:dest (config/read-config)) (:link post))]
+          (tfile/create-empty-file output)
+          (require (symbol (str/replace template  #"/.*"  "")))
+          (spit output ((var-get (resolve (symbol template))) post))))))
 ;
 
 (defn load-markdown
