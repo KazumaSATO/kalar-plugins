@@ -1,9 +1,9 @@
-(defproject tamaki "0.1.8"
+(defproject tamaki "0.1.9-SNAPSHOT"
   :description "Tamaki, a static site generator"
   :url "https://github.com/satokazuma/tamaki"
   :license {:name "The MIT License"
             :url "http://opensource.org/licenses/mit-license.php"}
-  :dependencies [[org.clojure/clojure "1.7.0"]
+  :dependencies [[org.clojure/clojure "1.8.0"]
                  [com.ranceworks/nanao_2.11 "1.0.1"]
                  [clojure-csv "2.0.1"]
                  [me.raynes/fs "1.4.6"]
