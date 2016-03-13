@@ -9,6 +9,7 @@
   (ehtml/html-resource (StringReader. html-text)))
 
 (defn extract-text [enlive-model]
+  "extract plain text from an enlive model"
   (letfn [(extrct-txt [model acc]
            (cond
              (instance? LazySeq model) (reduce #(str %1 (extrct-txt %2 "")) "" model)
