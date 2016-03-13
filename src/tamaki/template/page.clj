@@ -44,7 +44,7 @@
   ([] (compile-mds (:page-dir (config/read-config)))))
 
 
-(defn- load-postmd [path]
+(defn load-postmd [path]
   (letfn [(extract-date-from-filename [filename] (-> (re-seq #"^\d{4}-\d{1,2}-\d{1,2}" filename) first))
           (build-link [filename] (string/replace filename
                                                  #"(\d{4})-(\d{1,2})-(\d{1,2})-(.+)\.(md|markdown)$"
