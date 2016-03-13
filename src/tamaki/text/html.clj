@@ -12,8 +12,6 @@
   (letfn [(extrct-txt [model acc]
            (cond
              (instance? LazySeq model) (reduce #(str %1 (extrct-txt %2 "")) "" model)
-             ;; TODO if script tag, ignore
-             ;(or (instance? PersistentArrayMap model) (instance? PersistentStructMap model)) (extrct-txt (:content model) acc)
              (map? model) (if (= :script (:tag model))
                             acc
                             (extrct-txt (:content model) acc))
