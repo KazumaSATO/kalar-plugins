@@ -9,4 +9,3 @@
   ([post-dir]
    (filter #(rfs/file? %) (file-seq post-dir)))
   ([] (post-seq (io/file (:post-dir (config/read-config))))))
-
