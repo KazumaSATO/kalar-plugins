@@ -9,3 +9,4 @@
     (for [key-score (SimilarityCalculator/calcSimilarity text pairs)]
       {:key (.getKey key-score) :score (.getScore key-score)}
       )))
+
