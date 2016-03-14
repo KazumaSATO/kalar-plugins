@@ -2,8 +2,13 @@
   (:require [clojure.edn :as edn]
             [clojure.java.io :as io]))
 
-(defn read-config []
+
+(defn read-config
   "Load config.edn and return the map."
-  (let [loaded (-> "config.edn" io/resource io/file slurp edn/read-string)]
-    (merge {:recent-post-num 3}
-           loaded)))
+  ([config-file]
+   (let [user-config (-> config-file slurp edn/read-string)]
+     (merge {:recent-post-num 3
+             :report-dir "resources/_report"
+             }
+            user-config)))
+  ([] (read-config (-> "config.edn" io/resource io/file))))

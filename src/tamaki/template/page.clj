@@ -45,6 +45,7 @@
 
 
 (defn- load-postmd [path]
+  "Deprecated"
   (letfn [(extract-date-from-filename [filename] (-> (re-seq #"^\d{4}-\d{1,2}-\d{1,2}" filename) first))
           (build-link [filename] (string/replace filename
                                                  #"(\d{4})-(\d{1,2})-(\d{1,2})-(.+)\.(md|markdown)$"
@@ -54,6 +55,19 @@
          link (build-link filename)
          output (str (:dest (config/read-config)) link)]
     (assoc md :link link :output output :date (extract-date-from-filename filename)))))
+
+(defn read-postmd
+  ([path post-root]
+    (letfn [(extract-date-from-filename [filename] (-> (re-seq #"^\d{4}-\d{1,2}-\d{1,2}" filename) first))
+            (build-link [filename] (string/replace filename
+                                                   #"(\d{4})-(\d{1,2})-(\d{1,2})-(.+)\.(md|markdown)$"
+                                                   "/$1/$2/$3/$4.html"))]
+      (let [md (load-md path)
+            filename (-> path io/file .getName)
+            link (build-link filename)
+            output (str post-root link)]
+        (assoc md :link link :output output :date (extract-date-from-filename filename)))))
+  ([path] (read-postmd path (:dest (config/read-config)))))
 
 (defn- create-neighbor-link [links]
   (map (fn [p n] {:previous-page p :next-page n})
