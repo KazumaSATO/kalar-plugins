@@ -11,3 +11,4 @@ pom.xml.asc
 .hg/
 *.iml
 dev-resources/_site
+dev-resources/_report
