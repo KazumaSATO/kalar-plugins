@@ -33,3 +33,6 @@
               :score 0.02153783977434482})
            (tpost/read-similar-post "dev-resources/_report/similarity.edn"
                                     "dev-resources/tamaki/post/similarity/2015-01-19-lorem-ipsum.md")))))
+
+(comment  (deftest compling-post
+  ))
