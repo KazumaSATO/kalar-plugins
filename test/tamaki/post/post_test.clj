@@ -2,12 +2,11 @@
   (:require [clojure.test :refer :all]
             [clojure.java.io :as io]
             [me.raynes.fs :as fs]
-            [tamaki.post.post :as tpost]
-            [tamaki.post.post :as post]))
+            [tamaki.post.post :as tpost]))
 
 (deftest loading-posts
   (testing "find the post files "
-    (let [filenames (map #(fs/base-name %)  (post/post-seq (io/file "dev-resources/tamaki/post/recursive")))]
+    (let [filenames (map #(fs/base-name %)  (tpost/post-seq (io/file "dev-resources/tamaki/post/recursive")))]
       (is (= #{"post.md" "childpost.md"} (set filenames))))))
 
 (def ^:private post-dir "dev-resources/tamaki/post/similarity")
@@ -26,4 +25,11 @@
       (fs/mkdirs dir)
       (tpost/report-post-similarity written post-dir post-dest)
       (let [from-txt (clojure.edn/read-string (slurp written))]
-        (is (= 3 (count from-txt)))))))
+        (is (= 3 (count from-txt))))))
+  (testing "read similarity report"
+    (is (= ({:post "dev-resources/tamaki/post/similarity/2015-01-29-lorem-ipsum.md"
+             :score 0.02195880056341621}
+             {:post "dev-resources/tamaki/post/similarity/2015-05-28-lorem-ipsum.md",
+              :score 0.02153783977434482})
+           (tpost/read-similar-post "dev-resources/_report/similarity.edn"
+                                    "dev-resources/tamaki/post/similarity/2015-01-19-lorem-ipsum.md")))))

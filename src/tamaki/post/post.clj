@@ -6,7 +6,8 @@
             [tamaki.post.post :as tpost]
             [tamaki.text.similarity :as simi]
             [net.cgrand.enlive-html :as ehtml]
-            [clojure.java.io :as io])
+            [clojure.java.io :as io]
+            [clojure.edn :as edn])
   (:import (java.io StringReader)))
 
 
@@ -31,6 +32,8 @@
           :relation (map #(assoc {} :post (:key %) :score (:score %))
                          (simi/calc-similarity (:text key-text) (remove #(= (:key key-text) (:key %)) key-texts)))})))))
 
+(def ^:private similarity-report "similarity.edn")
+
 (defn report-post-similarity
   ([dest post-dir post-dest]
    (let [similarities (calc-post-similarity post-dir post-dest)]
@@ -39,4 +42,14 @@
    (let [similarities (calc-post-similarity)
          report-dir (io/file (-> (config/read-config) :report-dir))]
      (fs/mkdirs report-dir)
-     (spit (io/file report-dir "similarity.edn") (pr-str similarities)))))
+     (spit (io/file report-dir similarity-report) (pr-str similarities)))))
+
+(defn read-similar-post
+  ([report post]
+    (let [similarity (edn/read-string (slurp report))
+          relation (filter #(= (:post %) post) similarity)]
+      (:relation relation)))
+  ([post]
+   (let [report (io/file (:report-dir (config/read-config)) similarity-report)]
+     (read-similar-post report post)
+     )))
