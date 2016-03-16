@@ -45,7 +45,7 @@
 
 
 (defn- load-postmd [path]
-  "Deprecated"
+  "Deprecated. Use read-postmd"
   (letfn [(extract-date-from-filename [filename] (-> (re-seq #"^\d{4}-\d{1,2}-\d{1,2}" filename) first))
           (build-link [filename] (string/replace filename
                                                  #"(\d{4})-(\d{1,2})-(\d{1,2})-(.+)\.(md|markdown)$"
@@ -57,6 +57,8 @@
     (assoc md :link link :output output :date (extract-date-from-filename filename)))))
 
 (defn read-postmd
+  "a returned value example is as follows:
+    {:src \"path/to/the/raw/file\"}"
   ([path post-root]
     (letfn [(extract-date-from-filename [filename] (-> (re-seq #"^\d{4}-\d{1,2}-\d{1,2}" filename) first))
             (build-link [filename] (string/replace filename

@@ -33,7 +33,9 @@
 (deftest post-tests
   (testing "Load a mardkwon file for a post."
     (let [post (#'page/load-postmd  (find-res "posts/2011-12-01-post.md"))]
-      (is (= (:link post) "/2011/12/01/post.html"))))
+      (is (= (:link post) "/2011/12/01/post.html"))
+      (is (= "dev-resources/tamaki/template/posts/2011-12-01-post.md" (:src post)))
+      ))
 
   (testing "Load posts with the neighbor post links"
     (let [posts (map (fn [file] (let [path (-> file .getAbsolutePath)]
