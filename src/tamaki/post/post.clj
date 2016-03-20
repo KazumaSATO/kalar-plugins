@@ -19,8 +19,7 @@
   ([] (post-seq (io/file (:post-dir (config/read-config))))))
 
 (defn build-postlink
-  "To be implemented.
-  Renders the path of a raw text file into the link of the html generated from the raw text."
+  "Renders the path of a raw text file into the link of the html generated from the raw text."
   ([raw-file prefix]
    (letfn [(build-link [filename] (string/replace filename
                                                   #"(\d{4})-(\d{1,2})-(\d{1,2})-(.+)\.(md|markdown)$"

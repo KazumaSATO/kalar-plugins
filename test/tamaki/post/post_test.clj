@@ -34,5 +34,7 @@
            (tpost/read-similar-post "dev-resources/_report/similarity.edn"
                                     "dev-resources/tamaki/post/similarity/2015-01-19-lorem-ipsum.md")))))
 
-(comment  (deftest compling-post
-  ))
+(deftest compling-post
+  (testing "build the uri of a post"
+    (let [uri (tpost/build-postlink "2016-03-19-foobar.md")]
+      (is "2016/03/19/foobar.html" uri))))
