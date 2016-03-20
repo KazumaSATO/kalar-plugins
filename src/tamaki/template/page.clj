@@ -44,18 +44,6 @@
   ([] (compile-mds (:page-dir (config/read-config)))))
 
 
-(defn- load-postmd [path]
-  "Deprecated. Use read-postmd"
-  (letfn [(extract-date-from-filename [filename] (-> (re-seq #"^\d{4}-\d{1,2}-\d{1,2}" filename) first))
-          (build-link [filename] (string/replace filename
-                                                 #"(\d{4})-(\d{1,2})-(\d{1,2})-(.+)\.(md|markdown)$"
-                                                 "/$1/$2/$3/$4.html"))]
-   (let [md (load-md path)
-         filename (-> path io/file .getName)
-         link (build-link filename)
-         output (str (:dest (config/read-config)) link)]
-    (assoc md :link link :output output :date (extract-date-from-filename filename)))))
-
 (defn read-postmd
   "a returned value example is as follows:
     {:src \"path/to/the/raw/file\"}"
@@ -81,14 +69,14 @@
     (map (fn [m n] (merge m n)) posts neighbor-links)))
 
 (defn load-post-excerpt [md]
-  (let [compiled (load-postmd md)
+  (let [compiled (read-postmd md)
         excerpt  (-> (ehtml/select (ehtml/html-resource (StringReader. (:body compiled))) [:p]) first ehtml/text)]
     (dissoc (assoc compiled :excerpt excerpt) :body)))
 
 (defn load-recent-posts
   ([num post-dir]
    (let [mds (take num (-> (.listFiles (io/file post-dir)) reverse))]
-     (map #(load-postmd (.getAbsolutePath %)) mds)))
+     (map #(read-postmd (.getAbsolutePath %)) mds)))
   ([]
    (load-recent-posts (:recent-post-num (config/read-config)) (-> (config/read-config) :post-dir))))
 
@@ -114,7 +102,7 @@
           (spit dst ((var-get (resolve template)) page)))))))
 
 (defn compile-postmds [dir]
-  (let [posts (map #(-> % .getAbsolutePath load-postmd) (reverse (.listFiles (io/file dir))))
+  (let [posts (map #(-> % .getAbsolutePath read-postmd) (reverse (.listFiles (io/file dir))))
         posts-with-neighbors (append-neightbor-links posts)]
       (doseq [post posts-with-neighbors]
         (let [template (-> post :metadata :template)
