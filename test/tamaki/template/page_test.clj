@@ -57,3 +57,7 @@
     (is (nil? (#'page/compile-postmds (find-res "posts")))))
   )
 
+(deftest compling-post
+  (testing "build the uri of a post"
+    (let [uri (page/build-postlink "2016-03-19-foobar.md")]
+      (is "2016/03/19/foobar.html" uri))))

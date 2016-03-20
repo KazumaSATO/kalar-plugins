@@ -13,7 +13,6 @@
 (def ^:private post-dest "dev-resources/_site")
 
 (deftest test-calc-post-similarity
-
   (testing "calculation"
     (let [result  (tpost/calc-post-similarity post-dir post-dest)]
       (doseq [entity result]
@@ -34,7 +33,3 @@
            (tpost/read-similar-post "dev-resources/_report/similarity.edn"
                                     "dev-resources/tamaki/post/similarity/2015-01-19-lorem-ipsum.md")))))
 
-(deftest compling-post
-  (testing "build the uri of a post"
-    (let [uri (tpost/build-postlink "2016-03-19-foobar.md")]
-      (is "2016/03/19/foobar.html" uri))))

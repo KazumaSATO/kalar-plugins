@@ -18,15 +18,7 @@
    (filter #(fs/file? %) (file-seq post-dir)))
   ([] (post-seq (io/file (:post-dir (config/read-config))))))
 
-(defn build-postlink
-  "Renders the path of a raw text file into the link of the html generated from the raw text."
-  ([raw-file prefix]
-   (letfn [(build-link [filename] (string/replace filename
-                                                  #"(\d{4})-(\d{1,2})-(\d{1,2})-(.+)\.(md|markdown)$"
-                                                  "/$1/$2/$3/$4.html"))]
-     (let [html-uri (build-link (fs/name raw-file))]
-       (str prefix html-uri))))
-  ([raw-file] (build-postlink raw-file "")))
+
 
 (defn calc-post-similarity
   ([] (calc-post-similarity (-> (config/read-config) :post-dir) (-> (config/read-config) :dest)))

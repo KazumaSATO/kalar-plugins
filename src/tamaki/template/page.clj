@@ -1,5 +1,6 @@
 (ns tamaki.template.page
   (:require [clojure.java.io :as io]
+            [me.raynes.fs :as fs]
             [clojure.string :as str]
             [markdown.core :as md]
             [clojure.string :as string]
@@ -43,18 +44,24 @@
        (write-page mod-loaded))))
   ([] (compile-mds (:page-dir (config/read-config)))))
 
+(defn build-postlink
+  "Renders the path of a raw text file into the link of the html generated from the raw text."
+  ([raw-file prefix]
+   (letfn [(build-link [filename] (string/replace filename ; without extension
+                                                  #"(\d{4})-(\d{1,2})-(\d{1,2})-(.+)$"
+                                                  "/$1/$2/$3/$4.html"))]
+     (let [html-uri (build-link (fs/name raw-file))]
+       (str prefix html-uri))))
+  ([raw-file] (build-postlink raw-file "")))
 
 (defn read-postmd
   "a returned value example is as follows:
     {:src \"path/to/the/raw/file\"}"
   ([path post-root]
-    (letfn [(extract-date-from-filename [filename] (-> (re-seq #"^\d{4}-\d{1,2}-\d{1,2}" filename) first))
-            (build-link [filename] (string/replace filename
-                                                   #"(\d{4})-(\d{1,2})-(\d{1,2})-(.+)\.(md|markdown)$"
-                                                   "/$1/$2/$3/$4.html"))]
+    (letfn [(extract-date-from-filename [filename] (-> (re-seq #"^\d{4}-\d{1,2}-\d{1,2}" filename) first))]
       (let [md (load-md path)
             filename (-> path io/file .getName)
-            link (build-link filename)
+            link (build-postlink filename)
             output (str post-root link)]
         (assoc md :link link :output output :date (extract-date-from-filename filename)))))
   ([path] (read-postmd path (:dest (config/read-config)))))
