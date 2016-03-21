@@ -14,8 +14,14 @@
 
 (def ^:private date-formatter (SimpleDateFormat. "yyyy-MM-dd"))
 
+(defn page-seq
+  "Returns the page files."
+  ([page-dir]
+   (filter #(fs/file? %) (file-seq page-dir)))
+  ([] (page-seq (io/file (:page-dir (config/read-config))))))
+
 (defn- load-md
-  "Load a markdown file."
+  "Deprecated. Use tamaki.lwml.markdown/read-md. Loads a markdown file."
   ([md]
    (let [input (new StringReader (slurp md))
          output (new StringWriter)
@@ -24,7 +30,10 @@
      (merge {:body body :src md} {:metadata (merge metadata {:title (-> metadata :title first)
                                                              :template (-> metadata :template first)})}))))
 
+
+
 (defn- read-page [md]
+  "Deprecated. Use render-page."
   (let [metadata (:metadata md)]
     (assoc md :metadata (assoc metadata :link (-> metadata :link first)))
     ))

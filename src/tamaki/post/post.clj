@@ -3,7 +3,6 @@
             [me.raynes.fs :as fs]
             [tamaki.template.page :as tpage]
             [tamaki.text.html :as thtml]
-            [tamaki.post.post :as tpost]
             [tamaki.text.similarity :as simi]
             [net.cgrand.enlive-html :as ehtml]
             [clojure.java.io :as io]
@@ -29,7 +28,7 @@
                    body (thtml/extract-text (ehtml/html-resource (StringReader. (:body md))))]
                {:key path  :text body}))
            ]
-     (let [key-texts (map #(path-body %) (tpost/post-seq (io/file post-dir)))]
+     (let [key-texts (map #(path-body %) (post-seq (io/file post-dir)))]
        (for [key-text key-texts]
          {:post (:key key-text)
           :relation (map #(assoc {} :post (:key %) :score (:score %))
