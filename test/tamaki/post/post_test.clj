@@ -13,7 +13,6 @@
 (def ^:private post-dest "dev-resources/_site")
 
 (deftest test-calc-post-similarity
-
   (testing "calculation"
     (let [result  (tpost/calc-post-similarity post-dir post-dest)]
       (doseq [entity result]
@@ -27,9 +26,8 @@
       (let [from-txt (clojure.edn/read-string (slurp written))]
         (is (= 3 (count from-txt))))))
   (testing "read similarity report"
-    (is (= ({:post "dev-resources/tamaki/post/similarity/2015-01-29-lorem-ipsum.md"
-             :score 0.02195880056341621}
-             {:post "dev-resources/tamaki/post/similarity/2015-05-28-lorem-ipsum.md",
-              :score 0.02153783977434482})
-           (tpost/read-similar-post "dev-resources/_report/similarity.edn"
-                                    "dev-resources/tamaki/post/similarity/2015-01-19-lorem-ipsum.md")))))
+    (is '({:post "dev-resources/tamaki/post/similarity/2015-01-29-lorem-ipsum.md", :score 0.02195880056341621}
+          {:post "dev-resources/tamaki/post/similarity/2015-05-28-lorem-ipsum.md", :score 0.02153783977434482})
+        (tpost/read-similar-post "dev-resources/_report/similarity.edn"
+                                 "dev-resources/tamaki/post/similarity/2015-01-19-lorem-ipsum.md"))))
+

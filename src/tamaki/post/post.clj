@@ -7,6 +7,7 @@
             [tamaki.text.similarity :as simi]
             [net.cgrand.enlive-html :as ehtml]
             [clojure.java.io :as io]
+            [clojure.string :as string]
             [clojure.edn :as edn])
   (:import (java.io StringReader)))
 
@@ -16,6 +17,8 @@
   ([post-dir]
    (filter #(fs/file? %) (file-seq post-dir)))
   ([] (post-seq (io/file (:post-dir (config/read-config))))))
+
+
 
 (defn calc-post-similarity
   ([] (calc-post-similarity (-> (config/read-config) :post-dir) (-> (config/read-config) :dest)))
@@ -47,8 +50,8 @@
 (defn read-similar-post
   ([report post]
     (let [similarity (edn/read-string (slurp report))
-          relation (filter #(= (:post %) post) similarity)]
-      (:relation relation)))
+          relation (filter #(= (-> (:post %) io/file .getAbsolutePath) (-> post io/file .getAbsolutePath)) similarity)]
+      (-> relation first :relation)))
   ([post]
    (let [report (io/file (:report-dir (config/read-config)) similarity-report)]
      (read-similar-post report post)
