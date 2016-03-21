@@ -50,8 +50,8 @@
 (defn read-similar-post
   ([report post]
     (let [similarity (edn/read-string (slurp report))
-          relation (filter #(= (:post %) post) similarity)]
-      (:relation relation)))
+          relation (filter #(= (-> (:post %) io/file .getAbsolutePath) (-> post io/file .getAbsolutePath)) similarity)]
+      (-> relation first :relation)))
   ([post]
    (let [report (io/file (:report-dir (config/read-config)) similarity-report)]
      (read-similar-post report post)
