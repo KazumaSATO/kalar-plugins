@@ -12,5 +12,3 @@
          body (.toString output)]
      (merge {:body body :src md} {:metadata (merge metadata {:title (-> metadata :title first)
                                                              :template (-> metadata :template first)})}))))
-
-
