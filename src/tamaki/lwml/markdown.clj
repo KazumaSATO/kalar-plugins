@@ -1,7 +1,6 @@
 (ns tamaki.lwml.markdown
   (:require [markdown.core :as md])
-  (:import (java.io StringWriter StringReader)
-           (java.text SimpleDateFormat)))
+  (:import (java.io StringWriter StringReader)))
 
 (defn read-md
   "Reads a markdown file."
