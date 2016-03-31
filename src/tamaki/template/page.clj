@@ -30,8 +30,6 @@
      (merge {:body body :src md} {:metadata (merge metadata {:title (-> metadata :title first)
                                                              :template (-> metadata :template first)})}))))
 
-
-
 (defn- read-page [md]
   "Deprecated. Use render-page."
   (let [metadata (:metadata md)]
@@ -126,10 +124,3 @@
           (tfile/create-empty-file output)
           (require (symbol (str/replace template  #"/.*"  "")))
           (spit output ((var-get (resolve (symbol template))) post))))))
-
-
-(defn- create-neighbor-url [urls]
-  "REFACTORING create current-page"
-  (map (fn [p n] {:previous-page p :next-page n})
-       (cons nil (drop-last urls))
-       (concat (rest urls) '(nil))))
