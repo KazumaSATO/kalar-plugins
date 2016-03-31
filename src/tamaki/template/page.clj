@@ -6,6 +6,7 @@
             [clojure.string :as string]
             [net.cgrand.enlive-html :as ehtml]
             [tamaki-core.config :as config]
+            [tamaki.lwml.markdown :as tmd]
             [tamaki-core.file :as tfile])
   (:import (java.io StringWriter StringReader)
            (java.text SimpleDateFormat)))
@@ -18,15 +19,6 @@
    (filter #(fs/file? %) (file-seq page-dir)))
   ([] (page-seq (io/file (:page-dir (config/read-config))))))
 
-(defn- load-md
-  "Deprecated. Use tamaki.lwml.markdown/read-md. Loads a markdown file."
-  ([md]
-   (let [input (new StringReader (slurp md))
-         output (new StringWriter)
-         metadata (md/md-to-html input output :parse-meta? true :heading-anchors true)
-         body (.toString output)]
-     (merge {:body body :src md} {:metadata (merge metadata {:title (-> metadata :title first)
-                                                             :template (-> metadata :template first)})}))))
 
 (defn- read-page [md]
   "Deprecated. Use render-page."
@@ -44,7 +36,7 @@
 (defn compile-mds
   ([page-root-dir]
    (doseq [md (-> page-root-dir io/file .listFiles)]
-     (let [loaded (-> md .getAbsolutePath load-md)
+     (let [loaded (-> md .getAbsolutePath tmd/read-md)
            mod-loaded (read-page loaded)]
        (write-page mod-loaded))))
   ([] (compile-mds (:page-dir (config/read-config)))))
@@ -64,7 +56,7 @@
     {:src \"path/to/the/raw/file\"}"
   ([path post-root]
     (letfn [(extract-date-from-filename [filename] (-> (re-seq #"^\d{4}-\d{1,2}-\d{1,2}" filename) first))]
-      (let [md (load-md path)
+      (let [md (tmd/read-md path)
             filename (-> path io/file .getName)
             link (build-postlink filename)
             output (str post-root link)]
