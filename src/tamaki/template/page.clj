@@ -3,6 +3,7 @@
             [me.raynes.fs :as fs]
             [clojure.string :as str]
             [markdown.core :as md]
+            [tamaki.page.page :as tpage]
             [clojure.string :as string]
             [net.cgrand.enlive-html :as ehtml]
             [tamaki-core.config :as config]
@@ -20,11 +21,6 @@
   ([] (page-seq (io/file (:page-dir (config/read-config))))))
 
 
-(defn- read-page [md]
-  "Deprecated. Use render-page."
-  (let [metadata (:metadata md)]
-    (assoc md :metadata (assoc metadata :link (-> metadata :link first)))
-    ))
 
 (defn- write-page [page]
   (let [output (io/file (:dest (config/read-config)) (string/replace (-> page :metadata :link) #"^/" ""))
@@ -37,7 +33,7 @@
   ([page-root-dir]
    (doseq [md (-> page-root-dir io/file .listFiles)]
      (let [loaded (-> md .getAbsolutePath tmd/read-md)
-           mod-loaded (read-page loaded)]
+           mod-loaded (tpage/render-page loaded)]
        (write-page mod-loaded))))
   ([] (compile-mds (:page-dir (config/read-config)))))
 

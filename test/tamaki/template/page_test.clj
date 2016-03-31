@@ -2,6 +2,7 @@
   (:require [clojure.test :refer :all]
             [clojure.java.io :as io]
             [tamaki.template.page :as page]
+            [tamaki.page.page :as tpage]
             [clojure.string :as string]
             [tamaki.lwml.markdown :as md]
             [tamaki-core.config :as config]))
@@ -22,7 +23,7 @@
 
   (testing "Write a html file about a map generated from a markdown file."
     (let [loaded (md/read-md (-> test-md  .getAbsolutePath))
-          mod (#'page/read-page loaded)]
+          mod (tpage/render-page loaded)]
       (is (= nil (#'page/write-page mod)))))
 
   (testing "Complile the markdowns for the pages."

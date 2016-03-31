@@ -8,7 +8,6 @@
 (deftest tests
   (testing "Read markdown."
     (let [loaded (md/read-md  "dev-resources/tamaki/lwml/test.md")]
-      (println loaded)
       (is '{:body "<p>Lorem ipsum dolor sit amet.</p>",
             :src "dev-resources/tamaki/lwml/test.md",
             :metadata {:title "Lorem ipsum",
