@@ -4,10 +4,8 @@
             [clojure.string :as str]
             [markdown.core :as md]
             [clojure.string :as string]
-            [clojure.set :as set]
             [net.cgrand.enlive-html :as ehtml]
             [tamaki-core.config :as config]
-            [clojure-csv.core :as csv]
             [tamaki-core.file :as tfile])
   (:import (java.io StringWriter StringReader)
            (java.text SimpleDateFormat)))
