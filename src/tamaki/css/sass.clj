@@ -1,5 +1,10 @@
 (ns tamaki.css.sass
-    (:require [clojure.java.shell :as shell]))
+    (:require [clojure.java.shell :as shell]
+              [clojure.java.io :as io]
+              [clojure.string :as string]
+              [tamaki-core.config :as config]
+              [me.raynes.fs :as fs]
+              ))
 
 (defn compile-sass [input output]
   "Compiles a sass file."
