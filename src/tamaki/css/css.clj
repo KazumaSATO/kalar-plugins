@@ -13,9 +13,6 @@
        :dest (string/replace (str dest "/" (string/replace (.getAbsolutePath sheet) (re-pattern (str "^" prefix)) ""))
                              #"\.([^.]+)$"
                              ".css")})))
-(comment  (let [sheets (filter #(fs/file? %) (file-seq (io/file src)))]
-              (for [sheet sheets]
-                {:src (str sheet) :dest (string/replace (str dest "/" sheet) #"\.(.+)$" ".css")})))
 
 (defn compile-styles [styles dest]
   (letfn [(filter-styles [ptn stys] (filter #(re-seq ptn (:src %)) stys))
