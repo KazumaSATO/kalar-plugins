@@ -12,3 +12,4 @@ pom.xml.asc
 *.iml
 dev-resources/_site
 dev-resources/_report
+.sass-cache

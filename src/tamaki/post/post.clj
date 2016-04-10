@@ -12,12 +12,10 @@
 
 
 (defn post-seq
-  "return the post files"
+  "Returns the post files."
   ([post-dir]
    (filter #(fs/file? %) (file-seq post-dir)))
   ([] (post-seq (io/file (:post-dir (config/read-config))))))
-
-
 
 (defn calc-post-similarity
   ([] (calc-post-similarity (-> (config/read-config) :post-dir) (-> (config/read-config) :dest)))

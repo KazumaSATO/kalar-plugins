@@ -4,6 +4,7 @@
  :pagination-pattern "page:num.html"
  :posts-per-page 3
  :pagination-template tamaki.template.page-test/page-template
- :copy #{"css" "html/foo.html"}
+ :css #{"css"}
+ :copy #{"html/foo.html"}
  :url "http://tamaki.org"
 }
