@@ -1,7 +1,7 @@
 (ns tamaki-core.server
   (:require [tamaki-core.config :refer [read-config]]
             [tamaki-core.file :as tfile]
-            [tamaki.file.copy :as cpy]
+            [tamaki.file.file :as file]
             [tamaki.template.page :as page]
             [tamaki.sitemap.sitemap :as sitemap]
             [compojure.core :refer [GET defroutes]]
@@ -9,11 +9,11 @@
             [compojure.route :as route]
             [tamaki.css.css :as css]
             [clojure.java.io :as io]
-             [ring.util.response :refer [redirect]]))
+            [ring.util.response :refer [redirect]]))
 
 (defn tcompile []
   (tfile/clean-dest)
-  (cpy/copy)
+  (file/copy-files)
   (css/compile-styles (:css (read-config)) (:dest (read-config)))
   (page/compile-mds)
 
