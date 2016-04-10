@@ -1,6 +1,7 @@
 (ns tamaki.file.file
   (:require [me.raynes.fs :as fs]
             [clojure.string :as string]
+            [tamaki-core.config :as config]
             [clojure.java.io :as io]))
 
 
@@ -15,3 +16,6 @@
                                                                  ""))]
        (fs/copy+ s d)))))
 
+
+(defn copy-files ([srcs dest-root] (doseq [src srcs] (copy src dest-root)))
+  ([] (let [cnfg (config/read-config)] (copy-files (:file cnfg) (:dest cnfg)))))
