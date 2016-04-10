@@ -7,13 +7,14 @@
             [compojure.core :refer [GET defroutes]]
             [clojure.string :as string]
             [compojure.route :as route]
+            [tamaki.css.css :as css]
             [clojure.java.io :as io]
              [ring.util.response :refer [redirect]]))
-
 
 (defn tcompile []
   (tfile/clean-dest)
   (cpy/copy)
+  (css/compile-styles (:css (read-config)) (:dest (read-config)))
   (page/compile-mds)
 
   (spit (io/file (io/file (-> (read-config) :dest)) "sitemap.xml")
