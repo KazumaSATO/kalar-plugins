@@ -86,7 +86,8 @@
             (cons "index.html"
                   (map #(str/replace paginate-url-pattern #":num" (str %)) (range 2 (+ 1 total)))))]
     (let [num-per-page (:posts-per-page (config/read-config))
-          excerpts (map #(load-post-excerpt (.getAbsolutePath %)) (-> dir io/file .listFiles reverse))
+          excerpts (map #(load-post-excerpt (.getAbsolutePath %)) (remove #(re-seq #"^\..+" (.getName %))
+                                                                          (-> dir io/file .listFiles reverse)) )
           parted-excerpts (partition-all num-per-page excerpts)
           output-files (create-paginate-files (count parted-excerpts) (:pagination-pattern (config/read-config)))
           neighbor-links (create-neighbor-link output-files)
