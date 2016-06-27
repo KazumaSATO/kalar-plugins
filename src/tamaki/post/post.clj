@@ -6,7 +6,6 @@
             [tamaki.text.similarity :as simi]
             [net.cgrand.enlive-html :as ehtml]
             [clojure.java.io :as io]
-            [clojure.string :as string]
             [clojure.edn :as edn])
   (:import (java.io StringReader)))
 
@@ -14,7 +13,7 @@
 (defn post-seq
   "Returns the post files."
   ([post-dir]
-   (filter #(fs/file? %) (file-seq post-dir)))
+   (filter #(and (fs/file? %) (nil? (re-seq #"^\..*$" (fs/base-name %))))  (file-seq post-dir)))
   ([] (post-seq (io/file (:post-dir (config/read-config))))))
 
 (defn calc-post-similarity
