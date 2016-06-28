@@ -13,7 +13,10 @@
 (defn post-seq
   "Returns the post files."
   ([post-dir]
-   (filter #(and (fs/file? %) (nil? (re-seq #"^\..*$" (fs/base-name %))))  (file-seq post-dir)))
+   (letfn [(extract-date [filename] (first (re-seq #"^\d{4}-\d{1,2}-\d{1,2}" filename)))]
+     (reverse (sort-by #(extract-date (fs/base-name %))
+                       (filter #(and (fs/file? %) (nil? (re-seq #"^\..*$" (fs/base-name %)))) (file-seq post-dir))))))
+
   ([] (post-seq (io/file (:post-dir (config/read-config))))))
 
 (defn calc-post-similarity
