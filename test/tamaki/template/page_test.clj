@@ -2,6 +2,7 @@
   (:require [clojure.test :refer :all]
             [clojure.java.io :as io]
             [tamaki.template.page :as page]
+            [tamaki.post.post :as tpost]
             [tamaki.page.page :as tpage]
             [clojure.string :as string]
             [tamaki.lwml.markdown :as md]
@@ -33,15 +34,9 @@
 
 
 (deftest post-tests
-  (testing "Load a mardkwon file for a post."
-    (let [post (#'page/read-postmd  (find-res "posts/2011-12-01-post.md"))]
-      (is (= (:link post) "/2011/12/01/post.html"))
-      (is (= "dev-resources/tamaki/template/posts/2011-12-01-post.md" (:src post)))
-      ))
-
   (testing "Reads posts with the neighbor post links"
     (let [posts (map (fn [file] (let [path (-> file .getAbsolutePath)]
-                                  (#'page/read-postmd path)))
+                                  (#'tpost/read-postmd path)))
                      (-> "posts" find-res io/file .listFiles))
           appended (#'page/append-neightbor-links posts)]
       (is (some? appended))))
@@ -59,7 +54,3 @@
     (is (nil? (#'page/compile-postmds (find-res "posts")))))
   )
 
-(deftest compling-post
-  (testing "build the uri of a post"
-    (let [uri (page/build-postlink "2016-03-19-foobar.md")]
-      (is "2016/03/19/foobar.html" uri))))

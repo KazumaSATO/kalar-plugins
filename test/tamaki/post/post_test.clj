@@ -12,6 +12,9 @@
 (def ^:private post-dir "dev-resources/tamaki/post/similarity")
 (def ^:private post-dest "dev-resources/_site")
 
+(defn-  find-res [path]
+  (str "dev-resources/tamaki/template/" path))
+
 (deftest test-calc-post-similarity
   (testing "calculation"
     (let [result  (tpost/calc-post-similarity post-dir post-dest)]
@@ -31,3 +34,13 @@
         (tpost/read-similar-post "dev-resources/_report/similarity.edn"
                                  "dev-resources/tamaki/post/similarity/2015-01-19-lorem-ipsum.md"))))
 
+(deftest post-tests
+  (testing "Load a mardkwon file for a post."
+    (let [post (#'tpost/read-postmd  (find-res "posts/2011-12-01-post.md"))]
+      (is (= (:link post) "/2011/12/01/post.html"))
+      (is (= "dev-resources/tamaki/template/posts/2011-12-01-post.md" (:src post))))))
+
+(deftest compling-post
+  (testing "build the uri of a post"
+    (let [uri (tpost/build-postlink "2016-03-19-foobar.md")]
+      (is "2016/03/19/foobar.html" uri))))

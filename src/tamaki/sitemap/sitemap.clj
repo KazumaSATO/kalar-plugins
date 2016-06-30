@@ -15,7 +15,7 @@
    (let [root (string/replace url #"([^/])$" "$1/")]
      (letfn [(format-date [date] (.format (new SimpleDateFormat "yyyy-MM-dd") date))
              (post-elements [post-txts]
-               (for [post (map #(assoc (tpage/read-postmd %) :mod-time (fs/mod-time %)) post-txts)]
+               (for [post (map #(assoc (tpost/read-postmd %) :mod-time (fs/mod-time %)) post-txts)]
                  (assoc {} :loc (str root (string/replace (:link post) #"^(/)" ""))
                            :lastmod (format-date (:mod-time post)))
                  ))

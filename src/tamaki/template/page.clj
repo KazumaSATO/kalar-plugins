@@ -2,8 +2,8 @@
   (:require [clojure.java.io :as io]
             [me.raynes.fs :as fs]
             [clojure.string :as str]
-            [markdown.core :as md]
             [tamaki.page.page :as tpage]
+            [tamaki.post.post :as tpost]
             [clojure.string :as string]
             [net.cgrand.enlive-html :as ehtml]
             [tamaki-core.config :as config]
@@ -37,28 +37,6 @@
        (write-page mod-loaded))))
   ([] (compile-mds (:page-dir (config/read-config)))))
 
-(defn build-postlink
-  "Renders the path of a raw text file into the link of the html generated from the raw text."
-  ([raw-file prefix]
-   (letfn [(build-link [filename] (string/replace filename ; without extension
-                                                  #"(\d{4})-(\d{1,2})-(\d{1,2})-(.+)$"
-                                                  "/$1/$2/$3/$4.html"))]
-     (let [html-uri (build-link (fs/name raw-file))]
-       (str prefix html-uri))))
-  ([raw-file] (build-postlink raw-file "")))
-
-(defn read-postmd
-  "a returned value example is as follows:
-    {:src \"path/to/the/raw/file\"}"
-  ([path post-root]
-    (letfn [(extract-date-from-filename [filename] (-> (re-seq #"^\d{4}-\d{1,2}-\d{1,2}" filename) first))]
-      (let [md (tmd/read-md path)
-            filename (-> path io/file .getName)
-            link (build-postlink filename)
-            output (str post-root link)]
-        (assoc md :link link :output output :date (extract-date-from-filename filename)))))
-  ([path] (read-postmd path (:dest (config/read-config)))))
-
 (defn- create-neighbor-link [links]
   (map (fn [p n] {:previous-page p :next-page n})
        (cons nil (drop-last links))
@@ -69,14 +47,14 @@
     (map (fn [m n] (merge m n)) posts neighbor-links)))
 
 (defn load-post-excerpt [md]
-  (let [compiled (read-postmd md)
+  (let [compiled (tpost/read-postmd md)
         excerpt  (-> (ehtml/select (ehtml/html-resource (StringReader. (:body compiled))) [:p]) first ehtml/text)]
     (dissoc (assoc compiled :excerpt excerpt) :body)))
 
 (defn load-recent-posts
   ([num post-dir]
    (let [mds (take num (-> (.listFiles (io/file post-dir)) reverse))]
-     (map #(read-postmd (.getAbsolutePath %)) mds)))
+     (map #(tpost/read-postmd (.getAbsolutePath %)) mds)))
   ([]
    (load-recent-posts (:recent-post-num (config/read-config)) (-> (config/read-config) :post-dir))))
 
@@ -103,7 +81,7 @@
           (spit dst ((var-get (resolve template)) page)))))))
 
 (defn compile-postmds [dir]
-  (let [posts (map #(-> % .getAbsolutePath read-postmd) (reverse (.listFiles (io/file dir))))
+  (let [posts (map #(-> % .getAbsolutePath tpost/read-postmd) (reverse (.listFiles (io/file dir))))
         posts-with-neighbors (append-neightbor-links posts)]
       (doseq [post posts-with-neighbors]
         (let [template (-> post :metadata :template)

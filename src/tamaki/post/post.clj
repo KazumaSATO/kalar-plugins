@@ -1,14 +1,36 @@
 (ns tamaki.post.post
   (:require [tamaki-core.config :as config]
             [me.raynes.fs :as fs]
-            [tamaki.template.page :as tpage]
+            [tamaki.lwml.markdown :as tmd]
             [tamaki.text.html :as thtml]
+            [clojure.string :as string]
             [tamaki.text.similarity :as simi]
             [net.cgrand.enlive-html :as ehtml]
             [clojure.java.io :as io]
             [clojure.edn :as edn])
   (:import (java.io StringReader)))
 
+(defn build-postlink
+  "Renders the path of a raw text file into the link of the html generated from the raw text."
+  ([raw-file prefix]
+   (letfn [(build-link [filename] (string/replace filename ; without extension
+                                                  #"(\d{4})-(\d{1,2})-(\d{1,2})-(.+)$"
+                                                  "/$1/$2/$3/$4.html"))]
+     (let [html-uri (build-link (fs/name raw-file))]
+       (str prefix html-uri))))
+  ([raw-file] (build-postlink raw-file "")))
+
+(defn read-postmd
+  "a returned value example is as follows:
+    {:src \"path/to/the/raw/file\"}"
+  ([path post-root]
+   (letfn [(extract-date-from-filename [filename] (-> (re-seq #"^\d{4}-\d{1,2}-\d{1,2}" filename) first))]
+     (let [md (tmd/read-md path)
+           filename (-> path io/file .getName)
+           link (build-postlink filename)
+           output (str post-root link)]
+       (assoc md :link link :output output :date (extract-date-from-filename filename)))))
+  ([path] (read-postmd path (:dest (config/read-config)))))
 
 (defn post-seq
   "Returns the post files."
@@ -24,7 +46,7 @@
   ([post-dir dest-root]
    (letfn [(path-body [post]
              (let [path (.getPath post)
-                   md (tpage/read-postmd path dest-root)
+                   md (read-postmd path dest-root)
                    body (thtml/extract-text (ehtml/html-resource (StringReader. (:body md))))]
                {:key path  :text body}))
            ]
