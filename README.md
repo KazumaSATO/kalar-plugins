@@ -1,6 +1,6 @@
-# kalar-plugins
+# Tamaki
 
-A Clojure library designed to ... well, that part is up to you.
+Tamaki is a static site generator in Clojure.
 
 ## Usage
 
@@ -8,6 +8,8 @@ FIXME
 
 ## License
 
-Copyright © 2015 FIXME
+Copyright © 2015
 
 Distributed under the MIT License.
+
+
