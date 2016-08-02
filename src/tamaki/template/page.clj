@@ -10,6 +10,7 @@
             [tamaki.lwml.markdown :as tmd]
             [tamaki-core.file :as tfile])
   (:import (java.io StringWriter StringReader)
+
            (java.text SimpleDateFormat)))
 
 (def ^:private date-formatter (SimpleDateFormat. "yyyy-MM-dd"))
@@ -81,7 +82,8 @@
           (spit dst ((var-get (resolve template)) page)))))))
 
 (defn compile-postmds [dir]
-  (let [posts (map #(-> % .getAbsolutePath tpost/read-postmd) (reverse (.listFiles (io/file dir))))
+  (let [posts (map #(-> % .getAbsolutePath tpost/read-postmd) (tpost/post-seq (io/file dir)))
+        ;(map #(-> % .getAbsolutePath tpost/read-postmd) (reverse (.listFiles (io/file dir))))
         posts-with-neighbors (append-neightbor-links posts)]
       (doseq [post posts-with-neighbors]
         (let [template (-> post :metadata :template)
