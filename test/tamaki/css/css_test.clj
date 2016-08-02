@@ -17,6 +17,8 @@
     (let [dest (str (fs/temp-dir ""))]
       (#'css/compile-styles #{"dev-resources/tamaki/css/css/dir"
                                "dev-resources/tamaki/css/css/css.css"} dest)
+
       (is (= 2
              (count (map #(.getPath %)
-                         (filter #(and (fs/file? %) (re-seq  #"\.css$" (str %)))  (file-seq (io/file dest))))))))))
+                         (filter #(and (fs/file? %) (re-seq  #"\.css$" (str %)))  (file-seq (io/file dest))))))
+          "If sass isn't installed, this test fails"))))

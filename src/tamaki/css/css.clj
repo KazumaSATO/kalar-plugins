@@ -5,7 +5,8 @@
             [clojure.java.io :as io]))
 
 (defn- resolve-sty [src dest]
-  (let [sheets (filter #(fs/file? %) (-> src io/file file-seq))
+  "maps each style file path to its destination"
+  (let [sheets (filter #(fs/file? %) (-> src io/file file-seq)) ; ignore directories
         prefix (first (filter #(re-seq (re-pattern (str "^" %)) (-> src io/file .getAbsolutePath str))
                               (map #(.getPath %) (.getURLs (ClassLoader/getSystemClassLoader)))))]
     (for [sheet sheets]
