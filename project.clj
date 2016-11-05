@@ -10,5 +10,6 @@
                  [markdown-clj "0.9.82"]
                  [org.clojure/tools.logging "0.3.1"]
                  [org.lesscss/lesscss "1.7.0.1.1"]
+                 [org.ranceworks/tamaki-postclustering "0.0.1-SNAPSHOT"]
                  [enlive "1.1.6"]]
   :profiles {:dev {:resource-paths ["dev-resources"]}})
