@@ -4,4 +4,9 @@
 
 (deftest test-config-availability
   (testing "Read config.edn."
-    (is (config/read-config))))
+    (is (config/read-config)))
+  (testing "Read config files"
+    (let [config-map (config/load-config "dev-resources/config.edn")]
+      (is (contains? config-map :dest))
+      (is (contains? config-map :post-dir)))
+    ))

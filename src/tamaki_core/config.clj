@@ -4,7 +4,7 @@
 
 
 (defn read-config
-  "Load config.edn and return the map."
+  "Deprecated. Load config.edn and return the map."
   ([config-file]
    (let [user-config (-> config-file slurp edn/read-string)]
      (merge {:recent-post-num 3
@@ -12,3 +12,12 @@
              }
             user-config)))
   ([] (read-config (-> "config.edn" io/resource io/file))))
+
+
+(defn load-config
+  ([config-file]
+    (let [user-config (-> config-file slurp edn/read-string)
+          plugins (for [plugin (:plugins user-config)]
+                    (-> (io/resource (str plugin "/config.edn")) slurp edn/read-string))]
+      (reduce #(merge %2 %1) () (merge (into () plugins) user-config))))
+  ([] (load-config (-> "config.edn" io/resource io/file))))
