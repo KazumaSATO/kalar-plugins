@@ -6,7 +6,6 @@
   (testing "Read config.edn."
     (is (config/read-config)))
   (testing "Read config files"
-    (let [config-map (config/load-config "dev-resources/config.edn")]
-      (is (contains? config-map :dest))
-      (is (contains? config-map :post-dir)))
-    ))
+    (let [config-map (config/load-config "dev-resources/tamaki/config/config.edn")]
+      (is (contains? config-map :recent-post-num))
+      (is (= 2 (:recent-post-num config-map))))))
