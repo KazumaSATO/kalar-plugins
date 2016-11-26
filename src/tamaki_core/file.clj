@@ -11,7 +11,7 @@
     (.createNewFile file)))
 
 (defn clean-dest
-  "Make the destination empty."
+  "Deprecated. Make the destination empty."
   ([] (clean-dest (-> (config/read-config) :dest io/file)))
   ([dest] (doseq [file (.listFiles dest)]
             (if (raynes/directory? file)

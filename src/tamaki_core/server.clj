@@ -28,8 +28,3 @@
   (page/compile-postmds (-> (read-config) :post-dir)))
 
 (defn init [] (tcompile))
-
-(defroutes handler
-           (GET ":prefix{.*}/" [prefix] (redirect (str prefix "/index.html")))
-           (route/resources "/" {:root (string/replace (:dest (read-config)) #"^resources/" "")})
-  (route/not-found "Page not found"))

@@ -18,7 +18,7 @@
    (letfn [(rec-map [a b]
              (cond
                (and (map? a) (map? b)) (let [keys (set (into (keys a) (keys b)))]
-                                         (reduce #(merge %1 %2) (map #(assoc {} % (temp (get a %) (get b %))) keys)))
+                                         (reduce #(merge %1 %2) (map #(assoc {} % (rec-map (get a %) (get b %))) keys)))
                (nil? a) b
                (nil? b) a
                :else b))]
@@ -28,5 +28,3 @@
        ;(conj (vec plugins) user-config) -> [plugin1 .. pluginN  userconfig]
        (reduce #(rec-map %1 %2) (conj (vec plugins) user-config)))))
   ([] (load-config (-> "config.edn" io/resource io/file))))
-
-

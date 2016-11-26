@@ -5,6 +5,7 @@
             [clojure.java.io :as io]))
 
 
+; Deprecated
 (defn- copy [src dest-root]
   (let [files (filter #(fs/file? %) (-> src io/file file-seq))
         prefix (first (filter #(re-seq (re-pattern (str "^" %)) (-> src io/file .getAbsolutePath str))
@@ -16,6 +17,7 @@
                                                                  ""))]
        (fs/copy+ s d)))))
 
-
-(defn copy-files ([srcs dest-root] (doseq [src srcs] (copy src dest-root)))
+; Deprecated
+(defn
+  copy-files ([srcs dest-root] (doseq [src srcs] (copy src dest-root)))
   ([] (let [cnfg (config/read-config)] (copy-files (:file cnfg) (:dest cnfg)))))
