@@ -9,15 +9,16 @@
             [clojure.java.io :as io]
             [clojure.edn :as edn])
   (:import (java.io StringReader)))
-
+; TODO
 (defn build-postlink
-  "Renders the path of a raw text file into the link of the html generated from the raw text."
+  "Deprecated. Renders the path of a raw text file into the link of the html generated from the raw text."
   ([raw-file prefix]
    (letfn [(build-link [filename] (string/replace filename ; without extension
                                                   #"(\d{4})-(\d{1,2})-(\d{1,2})-(.+)$"
                                                   "/$1/$2/$3/$4.html"))]
      (let [html-uri (build-link (fs/name raw-file))]
        (str prefix html-uri))))
+  ; TODO deprecated
   ([raw-file] (build-postlink raw-file "")))
 
 (defn read-postmd
@@ -38,7 +39,7 @@
    (letfn [(extract-date [filename] (first (re-seq #"^\d{4}-\d{1,2}-\d{1,2}" filename)))]
      (reverse (sort-by #(extract-date (fs/base-name %))
                        (filter #(and (fs/file? %) (nil? (re-seq #"^\..*$" (fs/base-name %)))) (file-seq post-dir))))))
-
+  ; TODO delete
   ([] (post-seq (io/file (:post-dir (config/read-config))))))
 
 (defn calc-post-similarity
@@ -77,3 +78,65 @@
    (let [report (io/file (:report-dir (config/read-config)) similarity-report)]
      (read-similar-post report post)
      )))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(defn- build-postlink'
+  "Renders the path of a raw text file into the link of the html generated from the raw text."
+  ([filename prefix]
+   (letfn [(build-link [filename] (string/replace filename ; without extension
+                                                  #"(\d{4})-(\d{1,2})-(\d{1,2})-(.+)\.[^\.]+$"
+                                                  "/$1/$2/$3/$4.html"))]
+     (let [html-uri (build-link filename)]
+       (str prefix html-uri))))
+  ([raw-file] (build-postlink raw-file "")))
+
+
+(defn compile-posts [prefix post-dir]
+  (letfn [(select-compiler [compiler-map ext]
+            (map #(get compiler-map %) (filter #(= % (keyword ext)) (keys compiler-map))))]
+    (let [postfiles (-> post-dir io/file post-seq)
+          compilable-files (filter #(re-seq #"\.(md|markdown)$" (fs/base-name %)) postfiles)
+          links (map #(build-postlink' (fs/base-name %) prefix) postfiles)]
+      ;; TODO
+      )))
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
