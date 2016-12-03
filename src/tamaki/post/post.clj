@@ -80,7 +80,7 @@
      )))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(defn- build-postlink'
+(defn build-postlink'
   "Renders the path of a raw text file into the link of the html generated from the raw text."
   ([filename prefix]
    (letfn [(build-link [filename] (string/replace filename ; without extension
@@ -93,7 +93,16 @@
 
 (defn compile-posts [prefix post-dir]
   (letfn [(select-compiler [compiler-map ext]
-            (map #(get compiler-map %) (filter #(= % (keyword ext)) (keys compiler-map))))]
+            (map #(get compiler-map %) (filter #(= % (keyword ext)) (keys compiler-map))))
+          (compile [file compiler-map]
+            (let [dot-ext (fs/extension file)]
+              (if (some? dot-ext)
+                (let [compilefuncs (select-compiler compiler-map (subs dot-ext 1))]
+                  (if (not-empty compilefuncs)
+                    (let [func (first compilefuncs)]
+                      (require (symbol (string/replace  func #"/.*"  "")))
+                      ((var-get (resolve (symbol func))) file)))))))]
+
     (let [postfiles (-> post-dir io/file post-seq)
           compilable-files (filter #(re-seq #"\.(md|markdown)$" (fs/base-name %)) postfiles)
           links (map #(build-postlink' (fs/base-name %) prefix) postfiles)]
