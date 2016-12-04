@@ -12,16 +12,17 @@
     (require (symbol (str/replace  template #"/.*"  "")))
     (spit output ((var-get (resolve (symbol template))) page))))
 
-(defn- compile-page [page build-dir compiler-map]
+(defn- compile-page [page site-root build-dir compiler-map]
   "XXX ignore dot files and support subdirectories"
   (letfn [(render-page [page]
             "Renders a html page model from a model of lightweight markup language text."
-            (let [metadata (:metadata page)]
-              (assoc page :metadata (assoc metadata :link (-> metadata :link first))
-                             :output (fs/file build-dir (str/replace (-> page :metadata :link first) #"^/" "")))))]
+            (let [metadata (:metadata page)
+                  link (str/replace (str site-root "/" (-> metadata :link first)) #"[/]+" "/")]
+              (assoc page :metadata (assoc metadata :link link)
+                          :output (fs/file build-dir (str/replace (-> metadata :link first) #"^/" "")))))]
     (render-page (lwml/compile-lwmlfile page compiler-map))))
 
-(defn compile-pages [page-dir build-dir compiler-map]
+(defn compile-pages [page-dir site-root build-dir compiler-map]
   (doseq [pagefile (filter #(fs/file? %) (-> page-dir fs/file file-seq))]
-    (write-page (compile-page pagefile build-dir compiler-map))))
+    (write-page (compile-page pagefile site-root build-dir compiler-map))))
 

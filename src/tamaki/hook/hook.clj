@@ -13,4 +13,12 @@
       (fs/copy entity (:build config)))))
 
 (defn do-compilation [config]
+
   (println "current"))
+
+(def hooks
+  (letfn [(cat [tail] (str "tamaki.hook.hook/" tail))]
+   {:clean '((cat "clean"))
+    :initialize '((cat "initialize"))
+    :initialize '((cat "process-resources"))
+    :initialize '((cat "do-compilation"))}))

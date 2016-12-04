@@ -18,30 +18,35 @@
                              urls
                              (concat (rest urls) '(nil))))
 
-(defn- compile-posts [root-url post-prefix dest post-dir compiler-map]
+(defn- normalize-path [path] (string/replace path #"[/]+" "/"))
+
+(defn- compile-posts [site-root post-prefix dest post-dir compiler-map]
   (letfn [(convert-filename [ml-filename] (string/replace ml-filename
                                                           #"(\d{4})-(\d{1,2})-(\d{1,2})-(.+)\.[^\.]+$"
                                                           "$1/$2/$3/$4.html"))
-          (build-dest [basename]
-            (let [suffix (convert-filename basename)]
-                  (str dest "/" (if (= post-prefix "") "" (str post-prefix "/")) suffix)))]
+          (build-suffix [post-prefix basename]
+            (normalize-path (str post-prefix "/" (convert-filename basename))))]
     (let [postfiles (-> post-dir io/file post-seq)
           compiled (filter #(some? %) (map #(lwml/compile-lwmlfile (fs/absolute %) compiler-map) postfiles))
-          neighbors (chain-urls (map #(str root-url
-                                           "/"
-                                           (if (= post-prefix "") "" (str post-prefix "/"))
-                                           (-> (:src %) fs/base-name convert-filename))
+          neighbors (chain-urls (map #(normalize-path
+                                        (str site-root "/" (build-suffix post-prefix (fs/base-name (:src %)))))
                                      compiled))]
-          (map (fn [comp ne] (merge comp ne  {:dest (build-dest (fs/base-name (:src comp)))} )) compiled neighbors))))
+      (map (fn [comp ne]
+             (merge
+               comp
+               ne
+               {:output (normalize-path (str dest "/" (build-suffix post-prefix (fs/base-name (:src comp)))))}))
+           compiled
+           neighbors))))
 
-(defn- gen-pagenate [posts postnum-per-page pagenate-url-pattern build-dir root-url]
+(defn- gen-pagenate [posts postnum-per-page pagenate-url-pattern build-dir site-root]
   (letfn [(create-pagenation [total pagenate-url-pattern]
             (let [suffixes (cons "index.html"
                                  (map #(string/replace pagenate-url-pattern #":num" (str %))
                                       (range 2 (+ 1 total))))
-                  chained-urls (chain-urls (map #(str root-url "/" %) suffixes))]
+                  chained-urls (chain-urls (map #(normalize-path (str site-root "/" %)) suffixes))]
               (map (fn [chained-urls suffix]
-                     (assoc chained-urls :output (str build-dir "/" suffix)))
+                     (assoc chained-urls :output (normalize-path (str build-dir "/" suffix))))
                    chained-urls
                    suffixes)))
           (create-excerpt [html-text]
@@ -54,7 +59,26 @@
            pagenate-pages))))
 
 
-
+(defn write-posts [site-root
+                   post-prefix
+                   build-dir
+                   post-dir
+                   renderers
+                   pagenate-url-pattern
+                   postnum-per-page
+                   pagenate-template]
+   (let [posts (compile-posts site-root post-prefix build-dir post-dir renderers)]
+     (doseq [post posts]
+       (let [output (:output post)
+             template (-> post :metadata :template)]
+         (-> output fs/parent fs/mkdirs)
+         (require (symbol (string/replace  template #"/.*"  "")))
+         (spit output ((var-get (resolve (symbol template))) post))))
+     (doseq [page (gen-pagenate posts postnum-per-page pagenate-url-pattern build-dir site-root)]
+       (let [output (:output page)]
+         (-> output fs/parent fs/mkdirs)
+         (require (symbol (string/replace  pagenate-template #"/.*"  "")))
+         (spit output ((var-get (resolve (symbol pagenate-template))) page))))))
 
 
 
