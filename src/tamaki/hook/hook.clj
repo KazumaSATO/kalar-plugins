@@ -1,5 +1,9 @@
 (ns tamaki.hook.hook
-    (:require [me.raynes.fs :as fs]))
+    (:require [me.raynes.fs :as fs]
+              [tamaki.page.page :as tpage]
+              [tamaki.post.post :as tpost]
+              )
+  )
 
 (defn clean [config]
   (fs/delete-dir (:build config)))
@@ -13,12 +17,22 @@
       (fs/copy entity (:build config)))))
 
 (defn do-compilation [config]
-
-  (println "current"))
+  (tpage/compile-pages (:page-dir config)
+                       (:site-prefix config)
+                       (:build config)
+                       (:renderers config))
+  (tpost/write-posts (:site-prefix config)
+                     (:post-root config)
+                     (:build config)
+                     (:posts config)
+                     (:renderers config)
+                     (:pagenate-url config)
+                     (:postnum-per-page config)
+                     (:pagenate-template config)))
 
 (def hooks
   (letfn [(cat [tail] (str "tamaki.hook.hook/" tail))]
    {:clean '((cat "clean"))
     :initialize '((cat "initialize"))
-    :initialize '((cat "process-resources"))
-    :initialize '((cat "do-compilation"))}))
+    :process-resources '((cat "process-resources"))
+    :do-compilation '((cat "do-compilation"))}))
