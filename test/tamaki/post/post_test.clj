@@ -52,4 +52,11 @@
                                         "build"
                                         "dev-resources/tamaki/post/compile"
                                         {:md "tamaki.lwml.markdown/read-md"})]
-      (is (some? compiled)))))
+      (is (some? compiled))))
+  (testing "pagenation"
+    (let [posts (tpost/compile-posts "http://localhost"
+                                        "posts"
+                                        "build"
+                                        "dev-resources/tamaki/post/compile"
+                                        {:md "tamaki.lwml.markdown/read-md"})]
+      (is (some? (#'tpost/gen-pagenate posts 1 "page:num.html" "build" "http://localhost:8080"))))))
