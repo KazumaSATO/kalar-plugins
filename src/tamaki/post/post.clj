@@ -4,6 +4,7 @@
             [tamaki.lwml.markdown :as tmd]
             [tamaki.text.html :as thtml]
             [clojure.string :as string]
+            [tamaki.lwml.lwml :as lwml]
             [tamaki.text.similarity :as simi]
             [net.cgrand.enlive-html :as ehtml]
             [clojure.java.io :as io]
@@ -80,34 +81,36 @@
      )))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(defn build-postlink'
-  "Renders the path of a raw text file into the link of the html generated from the raw text."
-  ([filename prefix]
-   (letfn [(build-link [filename] (string/replace filename ; without extension
-                                                  #"(\d{4})-(\d{1,2})-(\d{1,2})-(.+)\.[^\.]+$"
-                                                  "/$1/$2/$3/$4.html"))]
-     (let [html-uri (build-link filename)]
-       (str prefix html-uri))))
-  ([raw-file] (build-postlink raw-file "")))
 
 
-(defn compile-posts [prefix post-dir]
-  (letfn [(select-compiler [compiler-map ext]
-            (map #(get compiler-map %) (filter #(= % (keyword ext)) (keys compiler-map))))
-          (compile [file compiler-map]
-            (let [dot-ext (fs/extension file)]
-              (if (some? dot-ext)
-                (let [compilefuncs (select-compiler compiler-map (subs dot-ext 1))]
-                  (if (not-empty compilefuncs)
-                    (let [func (first compilefuncs)]
-                      (require (symbol (string/replace  func #"/.*"  "")))
-                      ((var-get (resolve (symbol func))) file)))))))]
-
+(defn compile-posts [root-url post-prefix dest post-dir compiler-map]
+  (letfn [(convert-filename [ml-filename] (string/replace ml-filename
+                                                          #"(\d{4})-(\d{1,2})-(\d{1,2})-(.+)\.[^\.]+$"
+                                                          "$1/$2/$3/$4.html"))
+          (chain-urls [urls] (map (fn [p c n] {:previous p :current c :next n})
+                                  (cons nil (drop-last urls))
+                                  urls
+                                  (concat (rest urls) '(nil))))
+          (make-post-format [basename]
+            (let [suffix (convert-filename basename)
+                  dest (str dest "/" (if (= post-prefix "") "" (str post-prefix "/")) suffix)]
+              {:suffix suffix :dest dest}))
+          ]
     (let [postfiles (-> post-dir io/file post-seq)
-          compilable-files (filter #(re-seq #"\.(md|markdown)$" (fs/base-name %)) postfiles)
-          links (map #(build-postlink' (fs/base-name %) prefix) postfiles)]
-      ;; TODO
-      )))
+          compiled (filter #(some? %) (map #(lwml/compile-lwmlfile (fs/absolute %) compiler-map) postfiles))
+          neighbors (chain-urls (map #(str root-url
+                                           "/"
+                                           (if (= post-prefix "") "" (str post-prefix "/"))
+                                           (-> (:src %) fs/base-name convert-filename))
+                                     compiled))]
+          (map (fn [comp ne] (merge comp ne  (make-post-format (fs/base-name (:src comp))))) compiled neighbors))))
+
+
+;(defn- create-excedprt [])
+
+
+
+
 
 
 

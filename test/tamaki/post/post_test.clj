@@ -45,7 +45,11 @@
     (let [uri (tpost/build-postlink "2016-03-19-foobar.md")]
       (is "2016/03/19/foobar.html" uri))))
 
-(deftest build-postlink'
-  (testing "build post link from filename")
-  (let [uri (tpost/build-postlink' "2016-03-12-foobar.md")]
-    (is (= "/2016/03/12/foobar.html" uri) )))
+(deftest compile-test
+  (testing "create map"
+    (let [compiled (tpost/compile-posts "http://localhost"
+                                        "posts"
+                                        "build"
+                                        "dev-resources/tamaki/post/compile"
+                                        {:md "tamaki.lwml.markdown/read-md"})]
+      (is (some? compiled)))))
