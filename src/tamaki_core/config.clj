@@ -13,11 +13,14 @@
                (nil? a) b
                (nil? b) a
                :else b))]
-
      (let [configs (for [plugin (:plugins user-config)]
                      (let [plugin-ns (str plugin ".config")]
+                       (println plugin-ns)
+                       (->  plugin-ns type println)
+                       (println (symbol  plugin-ns "config"))
                        (require (symbol plugin-ns))
+                       (println "save")
                        (var-get (resolve (symbol plugin-ns "config")))))]
        (reduce #(rec-map %1 %2) (conj (vec configs) user-config)))))
-  ([] (-> "config.edn" io/resource io/file slurp edn/read-string))
+  ([] (-> "config.edn" io/resource io/file slurp edn/read-string load-config))
   )
