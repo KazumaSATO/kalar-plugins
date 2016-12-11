@@ -1,4 +1,4 @@
-(ns tamaki.hook.hook
+(ns tamaki.hook
     (:require [me.raynes.fs :as fs]
               [tamaki.page.page :as tpage]
               [tamaki.post.post :as tpost]))

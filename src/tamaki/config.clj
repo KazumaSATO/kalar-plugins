@@ -2,7 +2,7 @@
 
 
 (def config
-  (letfn [(cat [tail] (symbol "tamaki.hook.hook" tail))]
+  (letfn [(cat [tail] (symbol "tamaki.hook" tail))]
     {:recent-post-num 3
      :report-dir "resources/_report"
      :lwml {:md ""}

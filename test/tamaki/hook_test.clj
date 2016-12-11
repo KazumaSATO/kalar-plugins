@@ -1,7 +1,7 @@
-(ns tamaki.hook.hook-test
+(ns tamaki.hook-test
   (:require [clojure.test :refer :all]
             [clojure.java.io :as io]
-            [tamaki.hook.hook :as h]
+            [tamaki.hook :as h]
             [me.raynes.fs :as fs]))
 
 (deftest test-hook

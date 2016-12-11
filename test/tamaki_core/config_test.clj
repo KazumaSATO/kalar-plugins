@@ -3,5 +3,6 @@
             [tamaki-core.config :as c]))
 
 (deftest config-test
-  (testing "find the post files "
-    (println (c/load-config {:plugins ['tamaki]}))))
+  (testing "test loading configuration files"
+    (let [config (c/load-config {:plugins ['tamaki]})]
+       (is (= ['tamaki.hook/clean] (-> config :hooks :clean))))))
