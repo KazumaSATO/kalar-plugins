@@ -4,17 +4,25 @@
 
 
 (defn load-config
-  ([config-file]
-   (letfn [(rec-map [a b]
-             (cond
-               (and (map? a) (map? b)) (let [keys (set (into (keys a) (keys b)))]
-                                         (reduce #(merge %1 %2) (map #(assoc {} % (rec-map (get a %) (get b %))) keys)))
-               (nil? a) b
-               (nil? b) a
-               :else b))]
-     (let [user-config (-> config-file slurp edn/read-string)
-           plugins (for [plugin (:plugins user-config)]
-                     (-> (io/resource (str plugin "/config.edn")) slurp edn/read-string))]
-       ;(conj (vec plugins) user-config) -> [plugin1 .. pluginN  userconfig]
-       (reduce #(rec-map %1 %2) (conj (vec plugins) user-config)))))
-  ([] (load-config (-> "config.edn" io/resource io/file))))
+  [user-config]
+  (letfn [(rec-map [a b]
+            (cond
+              (and (map? a) (map? b)) (let [keys (set (into (keys a) (keys b)))]
+                                        (reduce #(merge %1 %2) (map #(assoc {} % (rec-map (get a %) (get b %))) keys)))
+              (and (sequential? a) (sequential? b)) (merge a b)
+              (nil? a) b
+              (nil? b) a
+              :else b))]
+
+    (comment
+      (let [user-config (-> config-file slurp edn/read-string)
+            plugins (for [plugin (:plugins user-config)]
+                      (-> (io/resource (str plugin "/config.edn")) slurp edn/read-string))]
+        ;(conj (vec plugins) user-config) -> [plugin1 .. pluginN  userconfig]
+        (reduce #(rec-map %1 %2) (conj (vec plugins) user-config))))
+
+    (let [configs (for [plugin (:plugins user-config)]
+                    (let [plugin-ns (str plugin ".config")]
+                      (require (symbol plugin-ns))
+                      (var-get (resolve (symbol plugin-ns "config")))))]
+      (reduce #(rec-map %1 %2) (conj (vec configs) user-config)))))

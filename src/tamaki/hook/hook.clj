@@ -1,9 +1,7 @@
 (ns tamaki.hook.hook
     (:require [me.raynes.fs :as fs]
               [tamaki.page.page :as tpage]
-              [tamaki.post.post :as tpost]
-              )
-  )
+              [tamaki.post.post :as tpost]))
 
 (defn clean [config]
   (fs/delete-dir (:build config)))
@@ -30,9 +28,3 @@
                      (:postnum-per-page config)
                      (:pagenate-template config)))
 
-(def hooks
-  (letfn [(cat [tail] (str "tamaki.hook.hook/" tail))]
-   {:clean '((cat "clean"))
-    :initialize '((cat "initialize"))
-    :process-resources '((cat "process-resources"))
-    :do-compilation '((cat "do-compilation"))}))
