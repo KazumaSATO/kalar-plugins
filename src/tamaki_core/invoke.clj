@@ -21,7 +21,7 @@
 (def ^:private steps ["clean"
                       "validate"
                       "initialize"
-                      "process-resources"
+                      "process-assets"
                       "render"])
 
 (defn defined-step? [step]

@@ -11,15 +11,22 @@
   (let [hooks (:hooks config)]
     (letfn  [(to-be-invoked? [func step]
                (not (= (.indexOf (get hooks step) func))))]
-      (to-be-invoked? 'tamaki.hook.process-resources :process-resources))))
+      nil)))
 
 (defn initialize [config]
   (fs/mkdirs (:build config)))
 
 (defn process-assets [config]
-  (let [res-dir (fs/file (:resources config))]
-    (doseq [entity (.listFiles res-dir)]
-      (fs/copy entity (:build config)))))
+  (let [assets (:assets config)]
+    (if (some? assets)
+      (let [res-dir (fs/file assets)
+            dest (:build config)]
+        (doseq [entity (.listFiles res-dir)]
+          (log/debug "coopy " entity " to " dest)
+          (cond
+            (fs/directory? entity) (fs/copy-dir entity dest)
+            (fs/file? entity) (fs/copy entity dest)))))
+    (log/debug "Assets aren't found.")))
 
 (defn render [config]
   (tpage/compile-pages (:page-dir config)
