@@ -19,5 +19,4 @@
                        (var-get (resolve (symbol plugin-ns "config")))))]
        (reduce #(rec-map %1 %2) (conj (vec configs) user-config)))))
   ([]
-   (-> "config.edn" io/resource io/file slurp edn/read-string load-config))
-  )
+   (-> "config.edn" io/resource io/file slurp edn/read-string load-config)))

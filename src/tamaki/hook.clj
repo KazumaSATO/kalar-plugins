@@ -1,15 +1,22 @@
 (ns tamaki.hook
     (:require [me.raynes.fs :as fs]
               [tamaki.page.page :as tpage]
-              [tamaki.post.post :as tpost]))
+              [tamaki.post.post :as tpost]
+              [clojure.tools.logging :as log]))
 
 (defn clean [config]
   (fs/delete-dir (:build config)))
 
+(defn validate [config]
+  (let [hooks (:hooks config)]
+    (letfn  [(to-be-invoked? [func step]
+               (not (= (.indexOf (get hooks step) func))))]
+      (to-be-invoked? 'tamaki.hook.process-resources :process-resources))))
+
 (defn initialize [config]
   (fs/mkdirs (:build config)))
 
-(defn process-resources [config]
+(defn process-assets [config]
   (let [res-dir (fs/file (:resources config))]
     (doseq [entity (.listFiles res-dir)]
       (fs/copy entity (:build config)))))

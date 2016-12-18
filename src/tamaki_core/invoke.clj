@@ -18,6 +18,7 @@
 
 
 (def ^:private steps ["clean"
+                      "validate"
                       "initialize"
                       "process-resources"
                       "render"])
@@ -25,11 +26,11 @@
 (defn defined-step? [step]
   (not (= (.indexOf steps step) -1)))
 
-(defn proc
+(defn build
   ([step config]
    (doseq [p (sub-steps step steps)]
      (invoke p config)))
-  ([step] (proc step (config/load-config))))
+  ([step] (build step (config/load-config))))
 
 
 

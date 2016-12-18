@@ -8,6 +8,7 @@
      :lwml {:md ""}
      :build "build"
      :hooks {:clean [(cat "clean")]
+             :validate [(cat "validate")]
              :initialize [(cat "initialize")]
-             :process-resources [(cat "process-resources")]
+             :process-assets [(cat "process-assets")]
              :render [(cat "render")]}}))
