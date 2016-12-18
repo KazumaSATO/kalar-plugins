@@ -20,7 +20,7 @@
 (def ^:private steps ["clean"
                       "initialize"
                       "process-resources"
-                      "do-compilation"])
+                      "render"])
 
 (defn defined-step? [step]
   (not (= (.indexOf steps step) -1)))

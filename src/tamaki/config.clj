@@ -10,4 +10,4 @@
      :hooks {:clean [(cat "clean")]
              :initialize [(cat "initialize")]
              :process-resources [(cat "process-resources")]
-             :do-compilation [(cat "do-compilation")]}}))
+             :render [(cat "render")]}}))

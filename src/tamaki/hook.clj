@@ -14,7 +14,7 @@
     (doseq [entity (.listFiles res-dir)]
       (fs/copy entity (:build config)))))
 
-(defn do-compilation [config]
+(defn render [config]
   (tpage/compile-pages (:page-dir config)
                        (:site-prefix config)
                        (:build config)
