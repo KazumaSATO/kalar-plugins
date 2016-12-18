@@ -1,14 +1,15 @@
 (ns tamaki-core.invoke
   (:require [tamaki-core.config :as config]))
 
+
 (defn invoke
-  ([phase config]
-    (doseq [func (get (:hooks config) (keyword phase))]
-      (-> func namespace symbol require)
-      ((-> func resolve var-get) config)))
-  ([phase]
-    (let [config (config/load-config)]
-      (invoke phase config))))
+  ([step config]
+   (doseq [func (get (:hooks config) (keyword step))]
+     (-> func namespace symbol require)
+     ((-> func resolve var-get) config)))
+  ([step]
+   (let [config (config/overwrite-config (config/load-config))]
+     (invoke step config))))
 
 (defn- sub-steps [step steps]
   (let [last-step (.indexOf steps step)]

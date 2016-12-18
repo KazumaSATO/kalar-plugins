@@ -2,6 +2,8 @@
   (:require [clojure.edn :as edn]
             [clojure.java.io :as io]))
 
+(def overwrite-config (memoize (fn [config] (let [func (:overwrite config)] (if (nil? func) config (func config))))))
+
 
 (defn load-config
   ([user-config]
