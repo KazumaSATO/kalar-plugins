@@ -8,7 +8,7 @@
      (-> func namespace symbol require)
      ((-> func resolve var-get) config)))
   ([step]
-   (let [config (config/overwrite-config (config/load-config))]
+   (let [config (config/load-config)]
      (invoke step config))))
 
 (defn- sub-steps [step steps]

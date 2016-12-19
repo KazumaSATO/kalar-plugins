@@ -7,6 +7,7 @@
      :report-dir "resources/_report"
      :lwml {:md ""}
      :build "build"
+     :pages "pages"
      :hooks {:clean [(cat "clean")]
              :validate [(cat "validate")]
              :initialize [(cat "initialize")]
