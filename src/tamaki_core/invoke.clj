@@ -30,6 +30,7 @@
 (defn build
   ([step config]
    (doseq [p (sub-steps step steps)]
+     (println p)
      (invoke p config)))
   ([step] (build step (config/load-config))))
 

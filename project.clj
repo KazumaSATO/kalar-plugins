@@ -14,4 +14,6 @@
                  [ch.qos.logback/logback-classic "1.1.8"]
                  [org.lesscss/lesscss "1.7.0.1.1"]
                  [enlive "1.1.6"]]
+
+  :exclusions [org.slf4j/slf4j-simple]
   :profiles {:dev {:resource-paths ["dev-resources"]}})

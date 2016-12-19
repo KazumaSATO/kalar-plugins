@@ -3,9 +3,7 @@
 
 (def config
   (letfn [(cat [tail] (symbol "tamaki.hook" tail))]
-    {:recent-post-num 3
-     :report-dir "resources/_report"
-     :lwml {:md ""}
+    {:renderers {:md ""}
      :build "build"
      :pages "pages"
      :hooks {:clean [(cat "clean")]
