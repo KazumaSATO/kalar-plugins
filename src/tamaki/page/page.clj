@@ -5,12 +5,12 @@
             [clojure.string :as str]
             ))
 
-(defn- write-page [page]
+(defn- write-page [page config]
   (let [output (:output page)
         template  (-> page :metadata :template)]
     (-> output fs/parent fs/mkdirs)
     (require (symbol (str/replace  template #"/.*"  "")))
-    (spit output ((var-get (resolve (symbol template))) page))))
+    (spit output ((var-get (resolve (symbol template))) page config))))
 
 (defn- compile-page [page context build-dir compiler-map]
   (letfn [(render-page [page]
@@ -21,8 +21,11 @@
                           :output (fs/file build-dir (str/replace (-> metadata :link first) #"^/" "")))))]
     (render-page (lwml/compile-lwmlfile page compiler-map))))
 
-(defn compile-pages
-  [page-dir context build-dir compiler-map]
-   (doseq [pagefile (filter #(fs/file? %) (-> page-dir fs/file file-seq))]
-     (write-page (compile-page pagefile context build-dir compiler-map))))
+(defn compile-pages [config]
+  (let [page-dir (:pages config)
+        build (:build config)
+        context (:context config)
+        renderers (:renderers config)]
+    (doseq [pagefile (filter #(fs/file? %) (-> page-dir fs/file file-seq))]
+      (write-page (compile-page pagefile context build renderers) config))))
 

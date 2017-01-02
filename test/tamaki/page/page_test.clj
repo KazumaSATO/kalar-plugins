@@ -17,8 +17,11 @@
       (is (= (page :output fs/absolute) (-> (str build-dir "/about/index.html") fs/file fs/absolute))))
     (testing "write compiled pages"
       (let [build-dir (-> "build" fs/temp-dir fs/absolute)]
-        (p/compile-pages "dev-resources/tamaki/page" "/" build-dir compilers)
+        (p/compile-pages {:pages "dev-resources/tamaki/page"
+                          :context ""
+                          :build build-dir
+                          :renderers compilers})
         (is (fs/exists? (fs/file build-dir "about/index.html")))))))
 
 
-(defn page-template [args] (str args))
+(defn page-template [args config] (str args))
