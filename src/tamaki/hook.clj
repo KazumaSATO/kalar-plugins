@@ -46,13 +46,8 @@
 
 (defn render [config]
   (letfn [(contains-all? [keys] (reduce #(and %1 %2) (map #(contains? config %) keys)))]
-    (if (contains-all? [:pages :build :renderers])
-      (let [pages (:pages config)
-            build (:build config)
-            context (:context config)
-            renderers (:renderers config)]
-        (if (some? context) (tpage/compile-pages pages context build renderers)
-                            (tpage/compile-pages pages build renderers))))
+    (if (contains-all? [:pages :build :context :renderers])
+      (tpage/compile-pages (:pages config) (:context config) (:build config) (:renderers config)))
     (if (contains-all? [:context
                         :post-root
                         :build
