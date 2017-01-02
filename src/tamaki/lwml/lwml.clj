@@ -2,6 +2,7 @@
   (:require [me.raynes.fs :as fs]
             [clojure.string :as string]))
 
+
 (defn compile-lwmlfile [file compiler-map]
   (letfn [(select-compiler [compiler-map ext]
             (map #(get compiler-map %) (filter #(= % (keyword ext)) (keys compiler-map))))]
