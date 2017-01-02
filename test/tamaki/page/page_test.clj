@@ -13,7 +13,7 @@
                compilers)]
     (testing "compile pages"
       (is (contains? page :body))
-      (is (= (-> page :metadata :link) "/blog/about/index.html"))
+      (is (= (-> page :meta :link) "/blog/about/index.html"))
       (is (= (page :output fs/absolute) (-> (str build-dir "/about/index.html") fs/file fs/absolute))))
     (testing "write compiled pages"
       (let [build-dir (-> "build" fs/temp-dir fs/absolute)]

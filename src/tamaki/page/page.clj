@@ -7,7 +7,7 @@
 
 (defn- write-page [page config]
   (let [output (:output page)
-        template  (-> page :metadata :template)]
+        template  (-> page :meta :template)]
     (-> output fs/parent fs/mkdirs)
     (require (symbol (str/replace  template #"/.*"  "")))
     (spit output ((var-get (resolve (symbol template))) page config))))
@@ -15,10 +15,10 @@
 (defn- compile-page [page context build-dir compiler-map]
   (letfn [(render-page [page]
             "Renders a html page model from a model of lightweight markup language text."
-            (let [metadata (:metadata page)
-                  link (str/replace (str context "/" (-> metadata :link first)) #"[/]+" "/")]
-              (assoc page :metadata (assoc metadata :link link)
-                          :output (fs/file build-dir (str/replace (-> metadata :link first) #"^/" "")))))]
+            (let [meta (:meta page)
+                  link (str/replace (str context "/" (-> meta :link)) #"[/]+" "/")]
+              (assoc page :meta (assoc meta :link link)
+                          :output (fs/file build-dir (str/replace (-> meta :link) #"^/" "")))))]
     (render-page (lwml/compile-lwmlfile page compiler-map))))
 
 (defn compile-pages [config]

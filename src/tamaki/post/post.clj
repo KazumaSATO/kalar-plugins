@@ -70,7 +70,7 @@
    (let [posts (compile-posts site-root post-prefix build-dir post-dir renderers)]
      (doseq [post posts]
        (let [output (:output post)
-             template (-> post :metadata :template)]
+             template (-> post :meta :template)]
          (-> output fs/parent fs/mkdirs)
          (require (symbol (string/replace  template #"/.*"  "")))
          (spit output ((var-get (resolve (symbol template))) post))))
