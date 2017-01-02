@@ -34,11 +34,17 @@
         (is (= "/page2.html" (:current page2)))
         (is (= (str build "/page2.html") (:output page2)))))
     (testing "write"
-      (tpost/write-posts
-        site-root post-prefix build post-dir renderers "page:num.html" 1 "tamaki.post.post-test/write-doc")
+      (tpost/write-posts {:context site-root
+                          :post-context post-prefix
+                          :build build
+                          :posts post-dir
+                          :renderers renderers
+                          :pagenate-url "page:num.html"
+                          :postnum-per-page 1
+                          :pagenate-template "tamaki.post.post-test/write-doc"})
       (is (fs/exists? (fs/file build "index.html")))
       (is (fs/exists? (fs/file build "page2.html")))
       (is (fs/exists? (fs/file build "page3.html")))
       (is (fs/exists? (fs/file build "posts"))))))
 
-(defn write-doc [doc] (str doc))
+(defn write-doc [doc config] (str doc))

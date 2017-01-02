@@ -49,19 +49,12 @@
     (if (contains-all? [:pages :build :context :renderers])
       (tpage/compile-pages config))
     (if (contains-all? [:context
-                        :post-root
+                        :post-context
                         :build
                         :posts
                         :renderers
                         :pagenate-url
                         :postnum-per-page
                         :pagenate-template])
-      (tpost/write-posts (:site-prefix config)
-                         (:post-root config)
-                         (:build config)
-                         (:posts config)
-                         (:renderers config)
-                         (:pagenate-url config)
-                         (:postnum-per-page config)
-                         (:pagenate-template config)))))
+      (tpost/write-posts config))))
 

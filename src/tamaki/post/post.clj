@@ -34,7 +34,7 @@
       (map (fn [comp ne]
              (merge
                comp
-               ne
+               ne ; neighbor
                {:output (normalize-path (str dest "/" (build-suffix post-prefix (fs/base-name (:src comp)))))}))
            compiled
            neighbors))))
@@ -59,65 +59,24 @@
            pagenate-pages))))
 
 
-(defn write-posts [site-root
-                   post-prefix
-                   build-dir
-                   post-dir
-                   renderers
-                   pagenate-url-pattern
-                   postnum-per-page
-                   pagenate-template]
-   (let [posts (compile-posts site-root post-prefix build-dir post-dir renderers)]
+(defn write-posts [config]
+  (let [context (:context config)
+        build (:build config)
+        post-context (:post-context config)
+        post-dir (:posts config)
+        renderers (:renderers config)
+        pagenate-url (:pagenate-url config)
+        postnum-per-page (:postnum-per-page config)
+        pagenate-template (:pagenate-template config)
+        posts (compile-posts context post-context build post-dir renderers)]
      (doseq [post posts]
        (let [output (:output post)
              template (-> post :meta :template)]
          (-> output fs/parent fs/mkdirs)
          (require (symbol (string/replace  template #"/.*"  "")))
-         (spit output ((var-get (resolve (symbol template))) post))))
-     (doseq [page (gen-pagenate posts postnum-per-page pagenate-url-pattern build-dir site-root)]
+         (spit output ((var-get (resolve (symbol template))) post config))))
+     (doseq [page (gen-pagenate posts postnum-per-page pagenate-url build context)]
        (let [output (:output page)]
          (-> output fs/parent fs/mkdirs)
          (require (symbol (string/replace  pagenate-template #"/.*"  "")))
-         (spit output ((var-get (resolve (symbol pagenate-template))) page))))))
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+         (spit output ((var-get (resolve (symbol pagenate-template))) page config))))))
