@@ -3,9 +3,9 @@
 
 (def config
   (letfn [(cat [tail] (symbol "tamaki.hook" tail))]
-    {:renderers {:md ""}
+    {:renderers {:md "tamaki.lwml.markdown/read-md"}
      :build "build"
-     :pages "pages"
+     :pages "resources/pages"
      :hooks {:clean [(cat "clean")]
              :validate [(cat "validate")]
              :initialize [(cat "initialize")]
