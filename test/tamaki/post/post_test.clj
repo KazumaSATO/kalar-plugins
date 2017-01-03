@@ -2,7 +2,8 @@
   (:require [clojure.test :refer :all]
             [clojure.java.io :as io]
             [me.raynes.fs :as fs]
-            [tamaki.post.post :as tpost]))
+            [tamaki.post.post :as tpost])
+  (:import (java.text SimpleDateFormat)))
 
 (deftest loading-posts
   (testing "find the post files "
@@ -23,6 +24,7 @@
                 renderers)
         post (first posts)]
     (testing "create map"
+        (is (= (.parse (new SimpleDateFormat "yyyy-MM-dd") "2015-05-28") (:date post)))
         (is (= "/posts/2015/05/28/foobar3.html" (:current post)))
         (is (= "/posts/2015/01/29/foobar2.html" (:next post)))
         (is (= (str build "/posts/2015/05/28/foobar3.html") (:output post))))
