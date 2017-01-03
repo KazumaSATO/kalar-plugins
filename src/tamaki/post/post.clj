@@ -4,7 +4,8 @@
             [tamaki.lwml.lwml :as lwml]
             [net.cgrand.enlive-html :as ehtml]
             [clojure.java.io :as io])
-  (:import (java.io StringReader)))
+  (:import (java.io StringReader)
+           (java.text SimpleDateFormat)))
 
 (defn- post-seq
   "Returns the post files."
@@ -20,14 +21,20 @@
 
 (defn- normalize-path [path] (string/replace path #"[/]+" "/"))
 
+(def ^:private date-formatter (new SimpleDateFormat "yyyy-MM-dd"))
+
 (defn- compile-posts [site-root post-prefix dest post-dir compiler-map]
   (letfn [(convert-filename [ml-filename] (string/replace ml-filename
                                                           #"(\d{4})-(\d{1,2})-(\d{1,2})-(.+)\.[^\.]+$"
                                                           "$1/$2/$3/$4.html"))
           (build-suffix [post-prefix basename]
-            (normalize-path (str post-prefix "/" (convert-filename basename))))]
+            (normalize-path (str post-prefix "/" (convert-filename basename))))
+          (extract-date [text-includes-date]
+            (let [maybe-date (first (re-seq #"\d{4}-\d?\d-\d?\d" text-includes-date))]
+              (if (some? maybe-date) (.parse date-formatter maybe-date))))]
     (let [postfiles (-> post-dir io/file post-seq)
-          compiled (filter #(some? %) (map #(lwml/compile-lwmlfile (fs/absolute %) compiler-map) postfiles))
+          compiled (map #(assoc % :date (-> % :src fs/base-name extract-date))
+                        (filter #(some? %) (map #(lwml/compile-lwmlfile (fs/absolute %) compiler-map) postfiles)))
           neighbors (chain-urls (map #(normalize-path
                                         (str site-root "/" (build-suffix post-prefix (fs/base-name (:src %)))))
                                      compiled))]
