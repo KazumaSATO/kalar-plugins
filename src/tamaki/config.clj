@@ -5,7 +5,7 @@
   (letfn [(cat [tail] (symbol "tamaki.hook" tail))]
     {:renderers {:md "tamaki.lwml.markdown/read-md"}
      :build "build"
-     :context ""
+     :context "/"
      :pages "resources/pages"
      :posts "resources/posts"
      :post-context "/posts"

@@ -27,8 +27,7 @@
   (letfn [(convert-filename [ml-filename] (string/replace ml-filename
                                                           #"(\d{4})-(\d{1,2})-(\d{1,2})-(.+)\.[^\.]+$"
                                                           "$1/$2/$3/$4.html"))
-          (build-suffix [post-prefix basename]
-            (normalize-path (str post-prefix "/" (convert-filename basename))))
+          (build-suffix [post-prefix basename] (str post-prefix "/" (convert-filename basename)))
           (extract-date [text-includes-date]
             (let [maybe-date (first (re-seq #"\d{4}-\d?\d-\d?\d" text-includes-date))]
               (if (some? maybe-date) (.parse date-formatter maybe-date))))]
@@ -64,7 +63,6 @@
              (assoc pagenate :posts posts-per-page))
            (create-pagenation (count pagenate-pages) pagenate-url-pattern)
            pagenate-pages))))
-
 
 (defn write-posts [config]
   (let [context (:context config)

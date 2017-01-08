@@ -21,6 +21,7 @@
 (def ^:private steps ["clean"
                       "validate"
                       "initialize"
+                      "generate-assets"
                       "process-assets"
                       "render"])
 
@@ -33,9 +34,3 @@
    (doseq [p (sub-steps step steps)]
      (invoke p config)))
   ([step] (build step (config/load-config))))
-
-
-
-
-
-
