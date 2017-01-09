@@ -44,7 +44,7 @@
                {:output (normalize-path (str dest "/" (build-suffix post-prefix (fs/base-name (:src comp)))))}))
            compiled
            neighbors))))
-
+; TODO pagenate -> paginate
 (defn- gen-pagenate [posts postnum-per-page pagenate-url-pattern build-dir site-root]
   (letfn [(create-pagenation [total pagenate-url-pattern]
             (let [suffixes (cons "index.html"

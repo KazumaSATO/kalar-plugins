@@ -1,5 +1,6 @@
 (ns tamaki-core.invoke
-  (:require [tamaki-core.config :as config]))
+  (:require [tamaki-core.config :as config]
+            [clojure.tools.logging :as log]))
 
 
 (defn invoke
@@ -31,6 +32,7 @@
 (defn build
   "executes steps"
   ([step config]
+   (log/debug "build with the configurations:" config)
    (doseq [p (sub-steps step steps)]
      (invoke p config)))
   ([step] (build step (config/load-config))))

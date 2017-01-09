@@ -10,7 +10,7 @@
      :posts "resources/posts"
      :post-context "/posts"
      :pagenate-url "/page:num.html"
-     :postnum-per-page 3
+     :postnum-per-page 3                                    ;TODO rename: posts-per-page
      :hooks {:clean [(cat "clean")]
              :validate [(cat "validate")]
              :initialize [(cat "initialize")]
