@@ -5,7 +5,7 @@
             :url "http://opensource.org/licenses/mit-license.php"}
   :dependencies [[org.clojure/clojure "1.8.0"]
                  [me.raynes/fs "1.4.6"]
-                 [markdown-clj "0.9.82"]
+                 [markdown-clj "0.9.91"]
                  [org.clojure/tools.logging "0.3.1"]
                  ;; https://mvnrepository.com/artifact/ch.qos.logback/logback-classic
                  [ch.qos.logback/logback-classic "1.1.8"]
