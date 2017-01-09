@@ -4,5 +4,6 @@
 
 (deftest config-test
   (testing "test loading configuration files"
-    (let [config (c/load-config {:plugins ['tamaki]})]
-      (is (= ['tamaki.hook/clean] (-> config :hooks :clean))))))
+    (let [config (c/load-config {:plugins ['tamaki]
+                                 :hooks {:clean ['foo/bar]}})]
+      (is (= ['tamaki.hook/clean 'foo/bar] (-> config :hooks :clean))))))

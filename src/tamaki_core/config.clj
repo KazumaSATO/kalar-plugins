@@ -8,7 +8,7 @@
             (cond
               (and (map? a) (map? b)) (let [keys (set (into (keys a) (keys b)))]
                                         (reduce #(merge %1 %2) (map #(assoc {} % (rec-map (get a %) (get b %))) keys)))
-              (and (sequential? a) (sequential? b)) (merge a b)
+              (and (sequential? a) (sequential? b)) (into a b)
               (nil? a) b
               (nil? b) a
               :else b))]
