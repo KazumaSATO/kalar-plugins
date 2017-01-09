@@ -53,8 +53,8 @@
                         :build
                         :posts
                         :renderers
-                        :pagenate-url
-                        :postnum-per-page
-                        :pagenate-template])
+                        :paginate-url
+                        :posts-per-page
+                        :paginate-template])
       (tpost/write-posts config))))
 

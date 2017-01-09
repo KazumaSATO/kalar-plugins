@@ -30,7 +30,7 @@
         (is (= (str build "/posts/2015/05/28/foobar3.html") (:output post))))
 
     (testing "pagenation"
-      (let [pages (#'tpost/gen-pagenate posts 1 "page:num.html" build "/")
+      (let [pages (#'tpost/gen-paginate posts 1 "page:num.html" build "/")
             page2 (nth pages 1)]
         (is (= "/index.html" (:previous page2)))
         (is (= "/page2.html" (:current page2)))
@@ -41,9 +41,9 @@
                           :build build
                           :posts post-dir
                           :renderers renderers
-                          :pagenate-url "page:num.html"
-                          :postnum-per-page 1
-                          :pagenate-template "tamaki.post.post-test/write-doc"})
+                          :paginate-url "page:num.html"
+                          :posts-per-page 1
+                          :paginate-template "tamaki.post.post-test/write-doc"})
       (is (fs/exists? (fs/file build "index.html")))
       (is (fs/exists? (fs/file build "page2.html")))
       (is (fs/exists? (fs/file build "page3.html")))

@@ -44,11 +44,11 @@
                {:output (normalize-path (str dest "/" (build-suffix post-prefix (fs/base-name (:src comp)))))}))
            compiled
            neighbors))))
-; TODO pagenate -> paginate
-(defn- gen-pagenate [posts postnum-per-page pagenate-url-pattern build-dir site-root]
-  (letfn [(create-pagenation [total pagenate-url-pattern]
+
+(defn- gen-paginate [posts posts-per-page paginate-url-pattern build-dir site-root]
+  (letfn [(create-pagination [total paginate-url-pattern]
             (let [suffixes (cons "index.html"
-                                 (map #(string/replace pagenate-url-pattern #":num" (str %))
+                                 (map #(string/replace paginate-url-pattern #":num" (str %))
                                       (range 2 (+ 1 total))))
                   chained-urls (chain-urls (map #(normalize-path (str site-root "/" %)) suffixes))]
               (map (fn [chained-urls suffix]
@@ -58,11 +58,11 @@
           (create-excerpt [html-text]
             (-> (ehtml/select (ehtml/html-resource (StringReader. html-text)) [:p]) first ehtml/text))]
 
-    (let [pagenate-pages (partition-all postnum-per-page (map #(assoc % :excerpt (-> % :body create-excerpt)) posts))]
-      (map (fn [pagenate posts-per-page]
-             (assoc pagenate :posts posts-per-page))
-           (create-pagenation (count pagenate-pages) pagenate-url-pattern)
-           pagenate-pages))))
+    (let [paginate-pages (partition-all posts-per-page (map #(assoc % :excerpt (-> % :body create-excerpt)) posts))]
+      (map (fn [paginate posts-per-page]
+             (assoc paginate :posts posts-per-page))
+           (create-pagination (count paginate-pages) paginate-url-pattern)
+           paginate-pages))))
 
 (defn write-posts [config]
   (let [context (:context config)
@@ -70,9 +70,9 @@
         post-context (:post-context config)
         post-dir (:posts config)
         renderers (:renderers config)
-        pagenate-url (:pagenate-url config)
-        postnum-per-page (:postnum-per-page config)
-        pagenate-template (:pagenate-template config)
+        paginate-url (:paginate-url config)
+        posts-per-page (:posts-per-page config)
+        paginate-template (:paginate-template config)
         posts (compile-posts context post-context build post-dir renderers)]
      (doseq [post posts]
        (let [output (:output post)
@@ -80,8 +80,8 @@
          (-> output fs/parent fs/mkdirs)
          (require (symbol (string/replace  template #"/.*"  "")))
          (spit output ((var-get (resolve (symbol template))) post config))))
-     (doseq [page (gen-pagenate posts postnum-per-page pagenate-url build context)]
+     (doseq [page (gen-paginate posts posts-per-page paginate-url build context)]
        (let [output (:output page)]
          (-> output fs/parent fs/mkdirs)
-         (require (symbol (string/replace  pagenate-template #"/.*"  "")))
-         (spit output ((var-get (resolve (symbol pagenate-template))) page config))))))
+         (require (symbol (string/replace  paginate-template #"/.*"  "")))
+         (spit output ((var-get (resolve (symbol paginate-template))) page config))))))

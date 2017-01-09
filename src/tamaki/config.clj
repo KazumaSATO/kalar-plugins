@@ -9,8 +9,8 @@
      :pages "resources/pages"
      :posts "resources/posts"
      :post-context "/posts"
-     :pagenate-url "/page:num.html"
-     :postnum-per-page 3                                    ;TODO rename: posts-per-page
+     :paginate-url "/page:num.html"
+     :posts-per-page 3
      :hooks {:clean [(cat "clean")]
              :validate [(cat "validate")]
              :initialize [(cat "initialize")]
