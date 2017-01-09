@@ -9,6 +9,5 @@
          output (new StringWriter)
          meta (md/md-to-html input output :parse-meta? true :heading-anchors true)
          body (.toString output)]
-     ;(reduce #(assoc %1 (key %2) (reduce (fn [a b] (str a b)) (val %2))) {} {:a ["a" "b"] :b ["c"] :c ["d"]})
      (merge {:body body :src md}
             {:meta (reduce #(assoc %1 (key %2) (reduce (fn [a b] (str a b)) (val %2))) {} meta)}))))
