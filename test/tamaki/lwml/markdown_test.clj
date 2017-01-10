@@ -8,9 +8,10 @@
 (deftest tests
   (testing "Read markdown."
     (let [loaded (md/read-md  "dev-resources/tamaki/lwml/test.md")]
-      (is '{:body "<p>Lorem ipsum dolor sit amet.</p>",
-            :src "dev-resources/tamaki/lwml/test.md",
-            :metadata {:title "Lorem ipsum",
-                       :link ["/about/index.html"],
-                       :template "tamaki.template.page-test/page-template", :category ["demo"]}}
-          loaded))))
+      (is (= {:body "<p>Lorem ipsum dolor sit amet.</p>"
+              :src "dev-resources/tamaki/lwml/test.md"
+              :meta {:title "Lorem ipsum"
+                     :link "/about/index.html"
+                     :template "tamaki.template.page-test/page-template"
+                     :category "demo"}}
+             loaded)))))
