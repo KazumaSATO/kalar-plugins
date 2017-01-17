@@ -1,6 +1,5 @@
 (ns tamaki.config)
 
-
 (def config
   (letfn [(cat [tail] (symbol "tamaki.hook" tail))]
     {:renderers {:md "tamaki.lwml.markdown/read-md"}

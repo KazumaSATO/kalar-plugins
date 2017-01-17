@@ -24,7 +24,8 @@
                       "initialize"
                       "generate-assets"
                       "process-assets"
-                      "render"])
+                      "render"
+                      "deploy"])
 
 (defn defined-step? [step]
   (not (= (.indexOf steps step) -1)))
