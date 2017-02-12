@@ -13,3 +13,4 @@ pom.xml.asc
 dev-resources/_site
 dev-resources/_report
 .sass-cache
+*.swp
