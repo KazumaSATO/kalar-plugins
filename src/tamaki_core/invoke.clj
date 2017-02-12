@@ -28,12 +28,12 @@
                       "deploy"])
 
 (defn defined-step? [step]
-  (not (= (.indexOf steps step) -1)))
+ (not (= (.indexOf steps step) -1)))
 
 (defn build
-  "executes steps"
-  ([step config]
-   (log/debug "build with the configurations:" config)
-   (doseq [p (sub-steps step steps)]
-     (invoke p config)))
-  ([step] (build step (config/load-config))))
+ "executes steps"
+ ([step config]
+  (log/debug "build with the configurations:" config)
+  (doseq [p (sub-steps step steps)]
+   (invoke p config)))
+ ([step] (build step (config/load-config))))

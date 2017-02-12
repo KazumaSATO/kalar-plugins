@@ -25,23 +25,24 @@
         post (first posts)]
     (testing "create map"
         (is (= (.parse (new SimpleDateFormat "yyyy-MM-dd") "2015-05-28") (:date post)))
-        (is (= "/posts/2015/05/28/foobar3.html" (:current post)))
-        (is (= "/posts/2015/01/29/foobar2.html" (:next post)))
-        (is (= (str build "/posts/2015/05/28/foobar3.html") (:output post))))
+        (is (= "/posts/2015/05/28/foobar3/" (:current post)))
+        (is (= "/posts/2015/01/29/foobar2/" (:next post)))
+        (is (= (str build "/posts/2015/05/28/foobar3/index.html") (:output post))))
 
-    (testing "pagenation"
-      (let [pages (#'tpost/gen-paginate posts 1 "page:num.html" build "/")
+    (testing "pagination" 
+      (let [pages (#'tpost/gen-paginate posts 1 "page:num/index.html" build "/")
             page2 (nth pages 1)]
-        (is (= "/index.html" (:previous page2)))
-        (is (= "/page2.html" (:current page2)))
-        (is (= (str build "/page2.html") (:output page2)))))
+        (is (= "/" (:previous page2)))
+        (is (= "/page2/" (:current page2)))
+        (is (= (str build "/page2/index.html") (:output page2)))))
+
     (testing "write"
       (tpost/write-posts {:context site-root
                           :post-context post-prefix
                           :build build
                           :posts post-dir
                           :renderers renderers
-                          :paginate-url "page:num.html"
+                          :paginate-url "page:num/index.html"
                           :posts-per-page 1
                           :paginate-template "tamaki.post.post-test/write-doc"})
       (is (fs/exists? (fs/file build "index.html")))
