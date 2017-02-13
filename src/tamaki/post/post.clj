@@ -59,9 +59,9 @@
                   chained-urls (chain-urls (map #(normalize-path (str site-root "/" %)) suffixes))]
               (map (fn [chained-urls suffix]
                      (assoc chained-urls :output (let [path (normalize-path (str build-dir "/" suffix))]
-                                                   (if (string/ends-with? path "/") (str path "index.html") path)))
+                                                   (if (string/ends-with? path "/") (str path "index.html") path))))
                    chained-urls
-                   suffixes))))
+                   suffixes)))
 
           (create-excerpt [html-text]
             (-> (ehtml/select (ehtml/html-resource (StringReader. html-text)) [:p]) first ehtml/text))]
@@ -90,7 +90,6 @@
          (spit output ((var-get (resolve (symbol template))) post config))))
 
      (doseq [page (gen-paginate posts posts-per-page paginate-url build context)]
-       (log/debug page)
        (let [output (:output page)]
          (-> output fs/parent fs/mkdirs)
          (require (symbol (string/replace  paginate-template #"/.*"  "")))

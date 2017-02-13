@@ -46,8 +46,8 @@
                           :posts-per-page 1
                           :paginate-template "tamaki.post.post-test/write-doc"})
       (is (fs/exists? (fs/file build "index.html")))
-      (is (fs/exists? (fs/file build "page2.html")))
-      (is (fs/exists? (fs/file build "page3.html")))
+      (is (fs/exists? (fs/file build "page2/index.html")))
+      (is (fs/exists? (fs/file build "page3/index.html")))
       (is (fs/exists? (fs/file build "posts"))))))
 
 (defn write-doc [doc config] (str doc))
