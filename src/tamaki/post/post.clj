@@ -16,6 +16,7 @@
                        (filter #(and (fs/file? %) (nil? (re-seq #"^\..*$" (fs/base-name %)))) (file-seq post-dir)))))))
 
 (defn- chain-urls 
+ ;; TODO stop removing index.html
  [urls] 
  (let [urls-end-with-slash (map #(string/replace % #"index\.html$" "") urls)]
   (map (fn [p c n] {:previous p :current c :next n})
@@ -23,7 +24,10 @@
    urls-end-with-slash
    (concat (rest urls-end-with-slash) '(nil)))))
 
-(defn- normalize-path [path] (string/replace path #"[/]+" "/"))
+(defn- normalize-path 
+  ;; TODO rename
+  [path] 
+  (string/replace path #"[/]+" "/"))
 
 (def ^:private date-formatter (new SimpleDateFormat "yyyy-MM-dd"))
 
