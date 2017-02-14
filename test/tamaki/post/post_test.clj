@@ -23,11 +23,12 @@
                 post-dir
                 renderers)
         post (first posts)]
-    (testing "create map"
-        (is (= (.parse (new SimpleDateFormat "yyyy-MM-dd") "2015-05-28") (:date post)))
-        (is (= "/posts/2015/05/28/foobar3/" (:current post)))
-        (is (= "/posts/2015/01/29/foobar2/" (:next post)))
-        (is (= (str build "/posts/2015/05/28/foobar3/index.html") (:output post))))
+    (testing 
+     "create map"
+     (is (= (.parse (new SimpleDateFormat "yyyy-MM-dd") "2015-05-28") (:date post)))
+     (is (= "/posts/2015/05/28/foobar3/" (:current post)))
+     (is (= "/posts/2015/01/29/foobar2/" (:next post)))
+     (is (= (str build "/posts/2015/05/28/foobar3/index.html") (:output post))))
 
     (testing "pagination" 
       (let [pages (#'tpost/gen-paginate posts 1 "page:num/index.html" build "/")
