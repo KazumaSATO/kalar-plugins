@@ -27,14 +27,18 @@
 
 (def ^:private date-formatter (new SimpleDateFormat "yyyy-MM-dd"))
 
-(defn- compile-posts [site-root post-prefix dest post-dir compiler-map]
+(defn- compile-posts 
+  [site-root post-prefix dest post-dir compiler-map]
   (letfn [(convert-filename 
             [ml-filename] 
             (string/replace ml-filename
                             #"(\d{4})-(\d{1,2})-(\d{1,2})-(.+)\.[^\.]+$"
                             "$1/$2/$3/$4/index.html"))
-          (build-suffix [post-prefix basename] (str post-prefix "/" (convert-filename basename)))
-          (extract-date [text-includes-date]
+          (build-suffix 
+            [post-prefix basename] 
+            (str post-prefix "/" (convert-filename basename)))
+          (extract-date 
+            [text-includes-date]
             (let [maybe-date (first (re-seq #"\d{4}-\d?\d-\d?\d" text-includes-date))]
               (if (some? maybe-date) (.parse date-formatter maybe-date))))]
 
