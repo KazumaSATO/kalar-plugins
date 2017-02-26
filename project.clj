@@ -10,6 +10,5 @@
                  [ch.qos.logback/logback-classic "1.1.8"]
                  [enlive "1.1.6"]
                  [compojure "1.5.1"]]
-
   :exclusions [org.slf4j/slf4j-simple]
   :profiles {:dev {:resource-paths ["dev-resources"]}})
