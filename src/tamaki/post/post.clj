@@ -4,6 +4,7 @@
             [tamaki.lwml.lwml :as lwml]
             [clojure.tools.logging :as log]
             [net.cgrand.enlive-html :as ehtml]
+            [clojure.spec :as s]
             [clojure.java.io :as io])
   (:import (java.io StringReader)
            (java.text SimpleDateFormat)))
@@ -33,15 +34,15 @@
 
 (defn- compile-posts 
   [site-root post-prefix dest post-dir compiler-map]
-  (letfn [(convert-filename 
+  (letfn [(convert-filename ; 2012-12-01-title.md -> 2012/12/01/title/index.html
             [ml-filename] 
             (string/replace ml-filename
                             #"(\d{4})-(\d{1,2})-(\d{1,2})-(.+)\.[^\.]+$"
                             "$1/$2/$3/$4/index.html"))
-          (build-suffix 
+          (build-suffix ; returns post-prefix/yyyy/MM/dd/title/index.html
             [post-prefix basename] 
             (str post-prefix "/" (convert-filename basename)))
-          (extract-date 
+          (extract-date ; returns date
             [text-includes-date]
             (let [maybe-date (first (re-seq #"\d{4}-\d?\d-\d?\d" text-includes-date))]
               (if (some? maybe-date) (.parse date-formatter maybe-date))))]
@@ -82,16 +83,9 @@
            (create-pagination (count paginate-pages) paginate-url-pattern)
            paginate-pages))))
 
-(defn write-posts [config]
-  (let [context (:context config)
-        build (:build config)
-        post-context (:post-context config)
-        post-dir (:posts config)
-        renderers (:renderers config)
-        paginate-url (:paginate-url config)
-        posts-per-page (:posts-per-page config)
-        paginate-template (:paginate-template config)
-        posts (compile-posts context post-context build post-dir renderers)]
+(defn write-posts
+  [{:keys [context build post-context posts renderers paginate-url posts-per-page paginate-template] :as config}]
+  (let [posts (compile-posts context post-context build posts renderers)]
      (doseq [post posts]
        (let [output (:output post)
              template (-> post :meta :template)]
